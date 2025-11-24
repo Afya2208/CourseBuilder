@@ -4,12 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Repositories;
 using API.Service;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Dto;
 
 namespace API.Controllers
 {
     [ApiController]
+  
     public class UserController(UserRepository userRepository, AuthService authService) : ControllerBase
     {
         [HttpGet("users")]
@@ -17,7 +19,13 @@ namespace API.Controllers
         {
             return Ok(await userRepository.FindAllAsync());
         }
-
+        [HttpGet("users/{userId:long}")]
+        public async Task<IActionResult> FindById(long userId)
+        {
+            var userDb = await userRepository.FindById(userId, [x => x.Role, x => x.UserInformation]);
+            return Ok(userDb.ToDto());
+        }
+        [AllowAnonymous]
         [HttpPost("sign-in")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
         {

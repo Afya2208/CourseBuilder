@@ -62,7 +62,7 @@ namespace API.Repositories
             {
                 foreach(var include in includes)
                 {
-                    query.Include(include);
+                    query = query.Include(include);
                 }
             }
             return await query.FirstOrDefaultAsync(condition);
@@ -75,7 +75,7 @@ namespace API.Repositories
             {
                 foreach(var include in includes)
                 {
-                    query.Include(include);
+                    query = query.Include(include);
                 }
             }
             return await query.Where(condition).ToListAsync();

@@ -17,18 +17,23 @@ namespace API.Service
     {
         public async Task<SignInResponse> SignInAsync(SignInRequest request)
         {
-            User? user = await userRepository.FindByCondition(x=>x.Email == request.Email);
+            User? user = await userRepository.FindByCondition(x=>x.Email == request.Email, [y=>y.Role, y=>y.UserInformation]);
             if (user == null) throw new AuthenticationException("Неправильный пароль или логин");
 
             var passwordHashFromRequest = Hashes.GetPbkdf2Hash(request.Password, user.Salt);
-            if (passwordHashFromRequest != user.Password) throw new AuthenticationException("Неправильный пароль или логин");
+            if (!passwordHashFromRequest.SequenceEqual(user.Password)) throw new AuthenticationException("Неправильный пароль или логин");
 
             var token =  JwtTokens.GenerateToken(configuration, user);
             return new SignInResponse()
             {
                 Token = token,
-                LastName = user.UserInformation.LastName,
-                
+                LastName = user.UserInformation?.LastName,
+                FirstName = user.UserInformation?.FirstName,
+                MiddleName = user.UserInformation?.MiddleName,
+                Position = user.UserInformation?.Position,
+                RoleId = user.RoleId,
+                RoleName = user.Role.Name,
+                UserId = user.Id,
             };
         }
         public async Task<bool> SignUpAsync(AddUserRequest request)

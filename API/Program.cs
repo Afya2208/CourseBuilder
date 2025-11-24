@@ -21,6 +21,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
     {
         ValidateIssuer = true,
         ValidateAudience = true,
+        ValidateIssuerSigningKey = true,
+        ClockSkew = TimeSpan.Zero,
         ValidateLifetime = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(conf["JWT:Secret"])) ,
         ValidAudience = conf["JWT:Audience"],
@@ -33,6 +35,8 @@ builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<UserRepository>();
 builder.Services.AddTransient<CourseRepository>();
 builder.Services.AddTransient<RoleRepository>();
+builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
 
@@ -46,6 +50,7 @@ app.UseCors(policy =>
 {
     policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials().WithOrigins("http://localhost:5173");
 });
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

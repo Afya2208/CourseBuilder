@@ -17,6 +17,19 @@ namespace Models.Dto
             };
             return dto;
         }
+        public static UserDto ToFullDto(this User entity)
+        {
+            var dto = new UserDto()
+            {
+                Id = entity.Id,
+                Email = entity.Email,
+            };
+            dto.Role = new RoleDto()
+            {
+            };
+            dto.UserInformation = new UserInformationDto();
+            return dto;
+        }
         public static Theme ToEntity(this ThemeDto dto)
         {
             var entity = new Theme()

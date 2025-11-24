@@ -20,9 +20,10 @@ namespace API.Util
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.Name)
             };
-            var expires = DateTime.Now.AddHours(12);
+            var now = DateTime.UtcNow;
             var token = new JwtSecurityToken(
-                expires: expires,
+                notBefore:now,
+                expires: now.AddSeconds(1),
                 claims: claims,
                 audience: appConfiguration["JWT:Audience"],
                 issuer: appConfiguration["JWT:Issuer"],
