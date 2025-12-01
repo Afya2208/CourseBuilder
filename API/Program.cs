@@ -1,4 +1,5 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using API.Repositories;
 using API.Service;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -14,6 +15,7 @@ builder.Services.AddDbContext<CoursesDbContext>(options =>
     options.UseNpgsql(conf.GetConnectionString("Default"));
 });
 builder.Services.AddSwaggerGen();
+builder.Services.AddMvc().AddJsonOptions(op=>op.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
 {
     options.RequireHttpsMetadata = false;
@@ -33,6 +35,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJw
 builder.Services.AddTransient<ThemeRepository>();
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<UserRepository>();
+builder.Services.AddTransient<ModuleRepository>();
 builder.Services.AddTransient<CourseRepository>();
 builder.Services.AddTransient<RoleRepository>();
 builder.Services.AddTransient<TaskAnswerRepository>();

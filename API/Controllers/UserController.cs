@@ -34,6 +34,7 @@ namespace API.Controllers
         {
             return Ok(await authService.SignInAsync(request));
         }
+        [AllowAnonymous]
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
         {

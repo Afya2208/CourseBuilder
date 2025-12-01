@@ -9,11 +9,10 @@ using Microsoft.AspNetCore.Mvc;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("tasks")]
     public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
         // 1. Получение информации по 1 задаче по ее id
-        [HttpGet("{taskId:long}")]
+        [HttpGet("tasks/{taskId:long}")]
         public async Task<IActionResult> FindById(long taskId)
         {  
             Models.Entities.Task? found = await taskRepository.FindByIdAsync(taskId);
@@ -22,7 +21,7 @@ namespace API.Controllers
         }
 
         // 2. Получение полного списка заданий занятия
-        [HttpGet("/lesson/{lessonId:long}")]
+        [HttpGet("/lesson/{lessonId:long}/tasks")]
         public async Task<IActionResult> FindByLessonId(long lessonId)
         {  
             List<Models.Entities.Task> foundTasks = await taskRepository.FindAllByConditionAsync(x=>x.LessonId == lessonId);
@@ -30,7 +29,7 @@ namespace API.Controllers
         }
 
         // 3. Удаление задачи
-        [HttpDelete("{taskId:long}")]
+        [HttpDelete("tasks/{taskId:long}")]
         public async Task<IActionResult> Delete(long taskId)
         {  
             return Ok(await taskRepository.DeleteAsync(taskId));

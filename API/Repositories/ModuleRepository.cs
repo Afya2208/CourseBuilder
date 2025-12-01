@@ -2,12 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Exceptions;
 using Models.Entities;
 
 namespace API.Repositories
 {
-    public class UserRepository(CoursesDbContext context) : BaseRepository<User>(context)
+    public class ModuleRepository(CoursesDbContext context) : BaseRepository<Module>(context)
     {
         
     }

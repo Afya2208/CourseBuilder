@@ -5,12 +5,16 @@ import { onMounted, provide, ref } from 'vue'
 import ThemeListView from './ThemeListView.vue'
 import CourseListView from './CourseListView.vue'
 
+const courses = ref<Course[]>()
+const themes = ref<Theme[]>()
+  provide('themes', themes)
+ provide('courses', courses)
 const getData = async () => {
   await api.get<Theme[]>('themes').then((res) => {
-    provide('themes', res.data)
+    themes.value = res.data
   })
   await api.get<Course[]>('courses').then((res) => {
-    provide('courses', res.data)
+   courses.value = res.data
   })
 }
 onMounted(async () => {
@@ -21,10 +25,12 @@ onMounted(async () => {
 <template>
   <div>
     <h1>Главная</h1>
-    <h2>Курсы</h2>
-    <CourseListView/>
-    <h2>Темы</h2>
-    <ThemeListView/>
+    <p v-if="!courses || !themes">Загрузка...</p>
+    <div v-if="courses && themes">
+        <h2>Курсы</h2>
+        <CourseListView />
+        <h2>Темы</h2>
+        <ThemeListView />
+    </div>
   </div>
 </template>
-

@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import type { User } from '@/models/main'
 import api from '@/services/api'
+import { useUserStore } from '@/stores/user'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
@@ -9,16 +10,15 @@ const passwordHidden = ref(true)
 const router = useRouter()
 const password = ref('')
 const authClick = async () => {
-  await api
-    .post<User>('sign-in', { email: email.value, password: password.value })
-    .then((res) => {
-      if (res.data) {
-        api.defaults.headers.common = { Authorization: `Bearer ${res.data.token}` }
-        sessionStorage.setItem('token', res.data.token)
-        sessionStorage.setItem('userId', res.data.userId.toString())
-        router.push({ path: '/' })
-      }
-    })
+  await api.post<User>('sign-in', { email: email.value, password: password.value }).then((res) => {
+    if (res.data) {
+      api.defaults.headers.common = { Authorization: `Bearer ${res.data.token}` }
+      sessionStorage.setItem('token', res.data.token)
+      sessionStorage.setItem('userId', res.data.userId.toString())
+      useUserStore().signIn(res.data)
+      router.push({ path: '/' })
+    }
+  })
 }
 </script>
 

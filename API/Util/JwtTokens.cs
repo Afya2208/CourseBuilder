@@ -23,7 +23,7 @@ namespace API.Util
             var now = DateTime.UtcNow;
             var token = new JwtSecurityToken(
                 notBefore:now,
-                expires: now.AddSeconds(1),
+                expires: now.AddHours(12),
                 claims: claims,
                 audience: appConfiguration["JWT:Audience"],
                 issuer: appConfiguration["JWT:Issuer"],

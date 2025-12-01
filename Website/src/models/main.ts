@@ -2,8 +2,8 @@ export interface Course {
   id: number
   name: string
   description?: string
-  price: number,
-  authorId?: Number,
+  price: number
+  authorId?: number
   themes?: Theme[]
 }
 
@@ -13,8 +13,8 @@ export interface Theme {
 }
 
 export interface Module {
-  id: number,
-  name: string,
+  id: number
+  name: string
   description?: string
 }
 

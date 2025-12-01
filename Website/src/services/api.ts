@@ -15,7 +15,7 @@ api.interceptors.request.use(
   },
   (error) => {
     if (error.status == 401) {
-      alert('Сессия закончена, требуется повторная авторизация')
+      console.log('Сессия закончена, требуется повторная авторизация')
       const router = useRouter()
       router.push({ path: '/' })
     }

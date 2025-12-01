@@ -1,9 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+
+using System.Collections;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace API.Repositories
 {
@@ -30,7 +29,7 @@ namespace API.Repositories
             await context.SaveChangesAsync();
             return deletedEntity;
         }
-        public async Task<Entity?> FindByIdAsync(object id, Expression<Func<Entity, object>>[]? includes = null)
+        public async Task<Entity?> FindByIdAsync(object id, System.Linq.Expressions.Expression<Func<Entity, object?>>[]? includes = null)
         {
             Entity? entity = await entities.FindAsync(id);
             if (entity == null) return null;
@@ -38,21 +37,31 @@ namespace API.Repositories
             {
                 foreach(var include in includes)
                 {
-                    await context.Entry(entity).Reference(include).LoadAsync();
+                    var s =include.Body.ToString().Split(".")[1];
+                    if (typeof(IEnumerable).IsAssignableFrom(include.Body.Type))
+                    {
+                        await context.Entry(entity).Navigation(s).LoadAsync();
+                    }
+                   else
+                    {
+                        await context.Entry(entity).Reference(include).LoadAsync();
+                    }
+                    
                 }
             }
             return entity;
         }  
         public async Task<List<Entity>> FindAllAsync(Expression<Func<Entity, object>>[]? includes = null)
         {
+            IQueryable<Entity> query = entities;
             if (includes != null)
             {
                 foreach(var include in includes)
                 {
-                    entities.Include(include);
+                    query = query.Include(include);
                 }
             }
-            return await entities.ToListAsync();
+            return   await query.ToListAsync();
         }
         public async Task<Entity?> FindByConditionAsync(Expression<Func<Entity, bool>> condition, 
             Expression<Func<Entity, object>>[]? includes = null)

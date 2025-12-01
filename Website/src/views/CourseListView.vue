@@ -11,9 +11,9 @@ const { user } = storeToRefs(useUserStore())
 const roleId = user.value?.roleId ?? 0
 
 const addCourseClick = async () => {
-    let newCourseName = prompt('Напишите название нового курса', 'Новый курс')
+    const newCourseName = prompt('Напишите название нового курса', 'Новый курс')
     if (newCourseName) {
-        let defaultNewCourse: Course = {
+        const defaultNewCourse: Course = {
             id: 0,
             name: newCourseName,
             price: 0,
@@ -25,7 +25,7 @@ const addCourseClick = async () => {
     }
     
 }
-const deleteCourseClick = async (courseId:Number) => {
+const deleteCourseClick = async (courseId:number) => {
     await api.delete(`courses/${courseId}`).then(res=> {
 
     })
@@ -33,14 +33,14 @@ const deleteCourseClick = async (courseId:Number) => {
 </script>
 
 <template>
-  <div :hidden="roleId != 1">
+  <div v-if="roleId == 1">
     <span @click="addCourseClick"></span>
   </div>
   <ul>
     <li v-for="course in courses" :key="course.id">
         <p>
             <RouterLink :to="`courses/${course.id}`">{{ course.name }}</RouterLink>
-            <span :hidden="roleId != 1" @click="deleteCourseClick(course.id)">Удалить</span>
+            <span v-if="roleId == 1" @click="deleteCourseClick(course.id)">Удалить</span>
             <br/>
             {{ course.description }}
         </p>

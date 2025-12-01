@@ -8,7 +8,7 @@ import { inject, ref, type Ref } from 'vue'
 const themes = ref(inject<Theme[]>('themes') ?? [])
 
 const { user } = storeToRefs(useUserStore())
-let roleId:Ref<Number> = ref(0)
+const roleId: Ref<number> = ref(0)
 if (user.value) {
   roleId.value = user.value.roleId
 }
