@@ -1,17 +1,16 @@
-
-import type { SignInResponse } from "../models/main"
-import { defineStore } from "pinia"
-import { computed, ref } from "vue"
+import type { User } from '../models/main'
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref<SignInResponse>(undefined)
+  const user = ref<User | null>(null)
   const fullName = computed(() => {
     if (user.value) {
-        return `${user.value.lastName} ${user.value.firstName} ${user.value.middleName}`;
+      return `${user.value.lastName} ${user.value.firstName} ${user.value.middleName}`
     }
-    return "Не авторизован";
-  } )
-  function signIn(newUser:SignInResponse) {
+    return 'Не авторизован'
+  })
+  function signIn(newUser: User) {
     user.value = newUser
   }
 

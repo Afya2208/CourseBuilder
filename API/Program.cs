@@ -35,6 +35,8 @@ builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<UserRepository>();
 builder.Services.AddTransient<CourseRepository>();
 builder.Services.AddTransient<RoleRepository>();
+builder.Services.AddTransient<TaskAnswerRepository>();
+builder.Services.AddTransient<TaskRepository>();
 builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
 builder.Services.AddProblemDetails();
 

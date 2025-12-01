@@ -1,33 +1,23 @@
-import type { SignInResponse } from "@/models/main";
-import api from "@/services/api";
-import axios from "axios";
-import { useRouter } from "vue-router";
+import type { User } from '@/models/main'
+import api from '@/services/api'
 
-export async function getUserData () : Promise<SignInResponse> {
-    try {
-        let user:SignInResponse
-        let userId = Number.parseInt(sessionStorage.getItem("userId"));
-        let router = useRouter()
-        let token = sessionStorage.getItem("token")
-        if(userId == undefined || token == undefined) {
-            return undefined
-        }
-        await api.get<SignInResponse>("users/" + userId,
-            {headers: {
-                Authorization:"Bearer " + token
-            }}
-        ).then(res => {
-            user = res.data
-        })
-            .catch(err => {
-                if (err.status == 401) {
-                    alert("Время сессии закончено, авторизируйтесь повторно, пожалуйста")
-                    router.push({path:"/auth"});
-                    return undefined
-                }
-            }) 
-        return user
-    } catch (err) {
-        return undefined
+export async function getUserData(): Promise<User | null> {
+  try {
+    let user: User | null = null
+    const userId = Number.parseInt(sessionStorage.getItem('userId') ?? 'NaN')
+    const token = sessionStorage.getItem('token')
+    if (Number.isNaN(userId) || !token) {
+      return null
     }
+    await api
+      .get<User>('users/' + userId, { headers: { Authorization: 'Bearer ' + token } })
+      .then((res) => {
+        user = res.data
+      })
+
+    return user
+  } catch (err) {
+    console.error(err)
+    return null
+  }
 }

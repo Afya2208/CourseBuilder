@@ -6,7 +6,7 @@ using Models.Entities;
 
 namespace API.Repositories
 {
-    public class CourseRepository(CoursesDbContext context) : BaseRepositry<Course>(context)
+    public class CourseRepository(CoursesDbContext context) : BaseRepository<Course>(context)
     {
         
     }

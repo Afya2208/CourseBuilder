@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
-    public class BaseRepositry<Entity>(DbContext context) where Entity : class
+    public class BaseRepository<Entity>(DbContext context) where Entity : class
     {
         private DbSet<Entity> entities = context.Set<Entity>();
         public async Task<Entity> UpdateAsync(Entity entity)
@@ -30,7 +30,7 @@ namespace API.Repositories
             await context.SaveChangesAsync();
             return deletedEntity;
         }
-        public async Task<Entity?> FindById(object id, Expression<Func<Entity, object>>[]? includes = null)
+        public async Task<Entity?> FindByIdAsync(object id, Expression<Func<Entity, object>>[]? includes = null)
         {
             Entity? entity = await entities.FindAsync(id);
             if (entity == null) return null;
@@ -54,7 +54,7 @@ namespace API.Repositories
             }
             return await entities.ToListAsync();
         }
-        public async Task<Entity?> FindByCondition(Expression<Func<Entity, bool>> condition, 
+        public async Task<Entity?> FindByConditionAsync(Expression<Func<Entity, bool>> condition, 
             Expression<Func<Entity, object>>[]? includes = null)
         {
             IQueryable<Entity> query = entities;
@@ -67,7 +67,7 @@ namespace API.Repositories
             }
             return await query.FirstOrDefaultAsync(condition);
         }   
-        public async Task<List<Entity>> FindAllByCondition(Expression<Func<Entity, bool>> condition,
+        public async Task<List<Entity>> FindAllByConditionAsync(Expression<Func<Entity, bool>> condition,
             Expression<Func<Entity, object>>[]? includes = null)
         {
             IQueryable<Entity> query = entities;

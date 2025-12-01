@@ -17,7 +17,7 @@ namespace API.Service
     {
         public async Task<SignInResponse> SignInAsync(SignInRequest request)
         {
-            User? user = await userRepository.FindByCondition(x=>x.Email == request.Email, [y=>y.Role, y=>y.UserInformation]);
+            User? user = await userRepository.FindByConditionAsync(x=>x.Email == request.Email, [y=>y.Role, y=>y.UserInformation]);
             if (user == null) throw new AuthenticationException("Неправильный пароль или логин");
 
             var passwordHashFromRequest = Hashes.GetPbkdf2Hash(request.Password, user.Salt);
@@ -36,10 +36,10 @@ namespace API.Service
                 UserId = user.Id,
             };
         }
-        public async Task<bool> SignUpAsync(AddUserRequest request)
+        public async Task<bool> SignUpAsync(SignUpRequest request)
         {
             // проверка на почту, если уже есть пользователь, то отклоняем запрос
-            User? user = await userRepository.FindByCondition(x=>x.Email == request.Email);
+            User? user = await userRepository.FindByConditionAsync(x=>x.Email == request.Email);
             if (user != null) throw new ArgumentException("Данная почта уже используется, укажите другую");
             // теперь хешируем пароль и сохраняем нового пользователя
             var salt = Hashes.GetNewSalt();

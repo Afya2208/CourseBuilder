@@ -43,6 +43,10 @@ public partial class CoursesDbContext : DbContext
 
     public virtual DbSet<UserInformation> UserInformations { get; set; }
 
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseNpgsql("username=postgres;password=;database=courses_db;port=5432;host=localhost");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ContentBlock>(entity =>
@@ -51,9 +55,7 @@ public partial class CoursesDbContext : DbContext
 
             entity.ToTable("content_block");
 
-            entity.Property(e => e.Id)
-                .ValueGeneratedNever()
-                .HasColumnName("id");
+            entity.Property(e => e.Id).HasColumnName("id");
             entity.Property(e => e.ContentBlockTypeId)
                 .HasDefaultValue(1)
                 .HasColumnName("content_block_type_id");
@@ -321,6 +323,7 @@ public partial class CoursesDbContext : DbContext
             entity.Property(e => e.FileName)
                 .HasMaxLength(256)
                 .HasColumnName("file_name");
+            entity.Property(e => e.IsRight).HasColumnName("is_right");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
             entity.Property(e => e.TextValue).HasColumnName("text_value");
 

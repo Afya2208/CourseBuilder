@@ -15,5 +15,7 @@ public partial class TaskAnswer
 
     public long TaskId { get; set; }
 
+    public bool? IsRight { get; set; }
+
     public virtual Task Task { get; set; } = null!;
 }

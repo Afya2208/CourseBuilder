@@ -12,7 +12,6 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("themes")]
-    
     public class ThemeController(ThemeRepository themeRepository) : ControllerBase
     {
        
@@ -26,6 +25,18 @@ namespace API.Controllers
         public async Task<IActionResult> Add([FromBody] Theme theme)
         {
             return Ok(await themeRepository.AddAsync(theme));
+        }
+        [HttpPut]
+        [Authorize]
+        public async Task<IActionResult> Update([FromBody] Theme themeToUpdate)
+        {
+             return Ok(await themeRepository.UpdateAsync(themeToUpdate));
+        }
+        [HttpDelete("themeId:int")]
+        [Authorize]
+        public async Task<IActionResult> Delete(int themeId)
+        {
+             return Ok(await themeRepository.DeleteAsync(themeId));
         }
     }
 }

@@ -1,19 +1,39 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using API.Exceptions;
+using API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("tasks")]
-    public class TaskController : ControllerBase
+    public class TaskController(TaskRepository taskRepository) : ControllerBase
     {
-        [HttpGet("{lessonId:long}")]
-        public async Task<IActionResult> FindAllByLessonId(long lessonId)
-        {
-            return Ok();
+        // 1. Получение информации по 1 задаче по ее id
+        [HttpGet("{taskId:long}")]
+        public async Task<IActionResult> FindById(long taskId)
+        {  
+            Models.Entities.Task? found = await taskRepository.FindByIdAsync(taskId);
+            if (found == null) throw new NotFoundException($"Не найдена задача id={taskId}");
+            return Ok(found);
+        }
+
+        // 2. Получение полного списка заданий занятия
+        [HttpGet("/lesson/{lessonId:long}")]
+        public async Task<IActionResult> FindByLessonId(long lessonId)
+        {  
+            List<Models.Entities.Task> foundTasks = await taskRepository.FindAllByConditionAsync(x=>x.LessonId == lessonId);
+            return Ok(foundTasks);
+        }
+
+        // 3. Удаление задачи
+        [HttpDelete("{taskId:long}")]
+        public async Task<IActionResult> Delete(long taskId)
+        {  
+            return Ok(await taskRepository.DeleteAsync(taskId));
         }
     }
 }

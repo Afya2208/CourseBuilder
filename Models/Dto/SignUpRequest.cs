@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Models.Dto
 {
-    public class AddUserRequest
+    public class SignUpRequest
     {
         public string Email {get; set;}
         public string Password {get; set;}
