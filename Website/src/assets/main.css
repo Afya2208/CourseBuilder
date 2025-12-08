@@ -1,0 +1,20 @@
+.li-block-title {
+    color: aqua;
+    background-color: blue;
+}
+
+.block-list-hor {
+     list-style: none;
+     background-color: blueviolet;
+     border: solid slateblue 4px;
+      border-radius: 10px;
+      padding: 5px;
+      display: flex;
+    flex-wrap: wrap;
+}
+.block-list-hor > div {
+     border: solid red 4px;
+      border-radius: 10px;
+      margin: 5px;
+      padding: 5px;
+}

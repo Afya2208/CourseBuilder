@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Models.Dto;
+using Models.Entities;
 
 namespace API.Controllers
 {
@@ -24,7 +25,7 @@ namespace API.Controllers
         [HttpGet("users/{userId:long}")]
         public async Task<IActionResult> FindById(long userId)
         {
-            var userDb = await userRepository.FindByIdAsync(userId, [x => x.Role, x => x.UserInformation]);
+            User? userDb = await userRepository.FindByIdAsync(userId, [x => x.Role, x => x.UserInformation]);
             if (userDb == null) throw new NotFoundException($"Не найден пользователь id={userId}"); 
             return Ok(userDb.ToFullDto());
         }
@@ -34,7 +35,6 @@ namespace API.Controllers
         {
             return Ok(await authService.SignInAsync(request));
         }
-        [AllowAnonymous]
         [HttpPost("sign-up")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
         {

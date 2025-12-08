@@ -2,8 +2,8 @@
 import type { Course, Theme } from '@/models/main'
 import api from '@/services/api'
 import { onMounted, provide, ref } from 'vue'
-import ThemeListView from './ThemeListView.vue'
-import CourseListView from './CourseListView.vue'
+import ThemeListView from '../components/ThemeListView.vue'
+import CourseListView from '../components/CourseListView.vue'
 
 const courses = ref<Course[]>()
 const themes = ref<Theme[]>()
@@ -14,7 +14,7 @@ const getData = async () => {
     themes.value = res.data
   })
   await api.get<Course[]>('courses').then((res) => {
-   courses.value = res.data
+    courses.value = res.data
   })
 }
 onMounted(async () => {
@@ -27,10 +27,10 @@ onMounted(async () => {
     <h1>Главная</h1>
     <p v-if="!courses || !themes">Загрузка...</p>
     <div v-if="courses && themes">
-        <h2>Курсы</h2>
-        <CourseListView />
         <h2>Темы</h2>
         <ThemeListView />
+        <h2>Курсы</h2>
+        <CourseListView />
     </div>
   </div>
 </template>

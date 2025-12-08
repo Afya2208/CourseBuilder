@@ -56,6 +56,11 @@ const deleteCourseClick = async (courseId:number) => {
                 </li>
             </ul>
         </p>
+        <p>
+            Количество модулей: {{ course.modulesCount }}
+            <br/>
+            Количество занятий: {{ course.lessonsCount }}
+        </p>
     </li>
   </ul>
 </template>

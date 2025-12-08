@@ -3,28 +3,40 @@ using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Exceptions;
 using API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Dto;
 using Models.Entities;
 
 namespace API.Controllers
 {
     [ApiController]
     [Route("courses")]
-    public class CourseController(CourseRepository courseRepository) : ControllerBase
+    public class CourseController(CourseRepository courseRepository, ModuleRepository moduleRepository,
+        LessonRepository lessonRepository) : ControllerBase
     {
         [HttpGet]
         public async Task<IActionResult> FindAll()
         {
-            return Ok(await courseRepository.FindAllAsync([x=>x.Themes]));
+            List<Course> courses = await courseRepository.FindAllAsync([x=>x.Themes]);
+            List<CourseDto> courseDtos = courses.ConvertAll(x=>x.ToDto());
+            courseDtos.ForEach(async x=>
+            {
+                x.LessonsCount = await lessonRepository.GetLessonsCountForCourse(x.Id);
+                x.ModulesCount = await moduleRepository.GetModulesCountForCourse(x.Id);
+            });
+            return Ok(courseDtos);
         }
         [HttpGet("{courseId:int}")]
         public async Task<IActionResult> FindById(int courseId)
         {
-            return Ok(await courseRepository.FindByIdAsync(courseId, [x=>x.Themes]));
+            Course? course = await courseRepository.FindByIdAsync(courseId, [x=>x.Themes]);
+            if (course == null) throw new NotFoundException($"Не найден курс id={courseId}");
+            return Ok(course.ToDto());
         }
-          [HttpPost]
+        [HttpPost]
         [Authorize]
         public async Task<IActionResult> Add([FromBody] Course course)
         {
