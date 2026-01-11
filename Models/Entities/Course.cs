@@ -13,13 +13,13 @@ public partial class Course
 
     public decimal Price { get; set; }
 
-    public long AuthorId { get; set; }
+    public long? AuthorId { get; set; }
 
     public bool ModulesHaveOrder { get; set; }
 
     public int MinimalCompletionPercentage { get; set; }
 
-    public virtual User Author { get; set; } = null!;
+    public virtual User? Author { get; set; }
 
     public virtual ICollection<Module> Modules { get; set; } = new List<Module>();
 

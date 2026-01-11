@@ -4,17 +4,18 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Models.Entities;
 
 namespace API.Controllers
 {
     [ApiController]
-
     public class ContentBlockController(ContentBlockRepository contentBlockRepository) : ControllerBase
     {
         [HttpGet("lessons/{lessonId:long}/content-blocks")]
         public async Task<IActionResult> FindByLessonId(long lessonId)
         {
-            return Ok(await contentBlockRepository.FindAllByConditionAsync(x=>x.LessonId == lessonId));
+            var contentBlocks = await contentBlockRepository.FindAllByLessonId(lessonId);
+            return Ok(contentBlocks);
         }
     }
 }

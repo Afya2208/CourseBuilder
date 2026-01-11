@@ -21,11 +21,11 @@ namespace API.Controllers
         }
 
         // 2. Получение полного списка заданий занятия
-        [HttpGet("/lesson/{lessonId:long}/tasks")]
+        [HttpGet("lessons/{lessonId:long}/tasks")]
         public async Task<IActionResult> FindByLessonId(long lessonId)
         {  
             List<Models.Entities.Task> foundTasks = await taskRepository.FindAllByConditionAsync(x=>x.LessonId == lessonId);
-            return Ok(foundTasks);
+            return Ok(foundTasks.OrderBy(x=>x.Order).ToList());
         }
 
         // 3. Удаление задачи

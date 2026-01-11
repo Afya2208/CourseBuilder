@@ -22,10 +22,15 @@ export interface Task extends LessonContent {
 
 }
 export interface ContentBlock extends LessonContent {
-
+  contentBlockTypeId: number,
+  textValue?: string,
+  fileName?: string,
+  fileUrl?: string,
+  id: number,
+  name:string
 }
 export interface LessonContent {
-
+  order: number,
 }
 
 export interface Module {

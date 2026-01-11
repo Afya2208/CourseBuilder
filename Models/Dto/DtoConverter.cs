@@ -9,7 +9,27 @@ namespace Models.Dto
 {
     public static class DtoConverter
     {
+        public static TaskTypeDto ToDto(this TaskType entity)
+        {
+            var dto = new TaskTypeDto()
+            {
+                Id = entity.Id,
+                Name = entity.Name  
+            };
+            return dto;
+        }
+        public static TaskDto ToDto(this Models.Entities.Task entity)
+        {
+            var dto = new TaskDto()
+            {
+                TaskType = entity.TaskType?.ToDto(),
+                Id = entity.Id,
+                LessonId = entity.LessonId,
+                Question = entity.Question,
 
+            };
+            return dto;
+        }
         public static ModuleDto ToDto(this Module entity)
         {
             var dto = new ModuleDto()

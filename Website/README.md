@@ -6,7 +6,7 @@
 
 Веб-интерфейс разработан на Vue.js 3 на TypeScript + Vite
 
-## Библиотеки JavaScript, TypeScript
+## Библиотеки TypeScript
 | Название   |Версия|
 |------------|--|
 | vue-router |4.6.3|

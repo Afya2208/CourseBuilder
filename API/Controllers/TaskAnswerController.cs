@@ -10,27 +10,27 @@ using Models.Entities;
 namespace API.Controllers
 {
     [ApiController]
-    [Route("task-answers")]
+
     public class TaskAnswerController(TaskAnswerRepository taskAnswerRepository) : ControllerBase
     {
-        [HttpGet]
-        public async Task<IActionResult> FindAll()
+        [HttpGet("tasks/{taskId:long}/answers")]
+        public async Task<IActionResult> FindAllByTaskId(long taskId)
         {
-            return Ok(await taskAnswerRepository.FindAllAsync());
+            return Ok(await taskAnswerRepository.FindAllByConditionAsync(x=>x.TaskId == taskId));
         }
-        [HttpPost]
+        [HttpPost("task-answers")]
         [Authorize]
         public async Task<IActionResult> Add([FromBody] TaskAnswer taskAnswerDto)
         {
             return Ok(await taskAnswerRepository.AddAsync(taskAnswerDto));
         }
-        [HttpPut]
+        [HttpPut("task-answers")]
         [Authorize]
         public async Task<IActionResult> Update([FromBody] TaskAnswer taskAnswerDto)
         {
              return Ok(await taskAnswerRepository.UpdateAsync(taskAnswerDto));
         }
-        [HttpDelete("themeId:int")]
+        [HttpDelete("task-answers/{themeId:int}")]
         [Authorize]
         public async Task<IActionResult> Delete(int taskAnswerId)
         {
