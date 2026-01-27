@@ -14,9 +14,10 @@ public partial class CoursesDbContext : DbContext
         : base(options)
     {
     }
+    
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        
+        //options.UseNpgsql("username=postgres;password=1234;host=localhost;port=5432;database=courses_db");
     }
 
 

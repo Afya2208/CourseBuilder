@@ -9,6 +9,19 @@ namespace Models.Dto
 {
     public static class DtoConverter
     {
+        public static LessonDto ToDto(this Lesson entity)
+        {
+            var dto = new LessonDto()
+            {
+                Id = entity.Id,
+                Description = entity.Description,
+                ModuleId = entity.ModuleId,
+                Order= entity.Order,
+                LessonTypeId = entity.LessonTypeId,
+                Name = entity.Name  
+            };
+            return dto;
+        }
         public static TaskTypeDto ToDto(this TaskType entity)
         {
             var dto = new TaskTypeDto()

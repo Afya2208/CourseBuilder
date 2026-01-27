@@ -49,7 +49,7 @@ onMounted(async () => {
   <div class="course-modules-div" v-if="modules">
     <h3>Модули</h3>
     <div class="block-list-hor">
-      <div v-for="module in modules">
+      <div v-for="module in modules" :style="{order: module.order}">
         <p>
           <RouterLink :to="`/courses/modules/${module.id}`">{{ module.name }}</RouterLink>
           <span class="li-block-title"></span>
@@ -65,3 +65,7 @@ onMounted(async () => {
     <button @click="saveChanges">Сохранить</button>
   </div>
 </template>
+
+<style scoped >
+    
+</style>

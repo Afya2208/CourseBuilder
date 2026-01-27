@@ -19,6 +19,7 @@ namespace API.Controllers
             List<Module> foundModules = await moduleRepository.FindAllByConditionAsync(x => x.CourseId == courseId);
             List<ModuleDto> moduleDtos = foundModules.ConvertAll(x=>x.ToDto());
             moduleDtos.ForEach(async x=>x.LessonsCount = await lessonRepository.GetLessonsCountForModule(x.Id));
+            moduleDtos = moduleDtos.OrderBy(x=> x.Order).ToList();
             return Ok(moduleDtos);
         }
         [HttpGet("modules/{moduleId:long}")]

@@ -16,7 +16,10 @@ export interface Theme {
 export interface Lesson {
   id: number
   name: string
-   description?: string
+  description?: string,
+  moduleId: number,
+  lessonTypeId: number,
+  order:number
 }
 export interface Task {
   taskTypeId: number
@@ -46,20 +49,18 @@ export interface ContentBlock {
   
   name:string
 }
-
-
 export interface Module {
   id: number
   name: string
-  description?: string
-   lessonsCount?: number
+  description?: string,
+  courseId:number
+  lessonsCount?: number,
+  order: number
 }
-
 export interface ProblemDetails {
   status: number
   title: string
 }
-
 export interface User {
   userId: number
   roleName: string

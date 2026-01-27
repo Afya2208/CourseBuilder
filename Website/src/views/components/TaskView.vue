@@ -37,11 +37,6 @@ const loadData = async () => {
     else if (theTask.value.taskTypeId == 3) {
         await api.get<Correlation[]>(`tasks/${theTask.value.id}/correlations`).then(res=>{
             let correctList:Correlation[] = res.data;
-
-            console.log("TEST")
-            console.log(JSON.stringify(correctList))
-            let mixed = mixCorrelations(correctList)
-            console.log(JSON.stringify(mixed))
             /*
             let mixed: Correlation[] = []
             let rightNumbers: number[] = []
@@ -110,9 +105,9 @@ const loadData = async () => {
             </table>
             <table>
                 <tbody>
-                    <tr v-for="correlation in userCorrelations">
+                    <tr v-for="correlation, index in userCorrelations">
                         <td>
-                            <input v-model="correlation.left"/>
+                            <p>{{ index+1 }})</p>
                         </td>
                         <td>
                             <input v-model="correlation.right"/>
@@ -126,6 +121,15 @@ const loadData = async () => {
             <select size="5" :multiple="theTask.taskTypeId == 5">
                 <option v-for="answerOption in answerOptions" :value="answerOption.textValue">{{ answerOption.textValue }}</option>
             </select>
+        </div>
+        <div v-else-if="theTask.taskTypeId == 6">
+            <p>{{ theTask.question }}</p>
+            <p>
+                <label>
+                    <span>Прикрепите файл:</span>
+                    <input type="file"/>
+                </label>
+            </p>
         </div>
     </div>
 </template>

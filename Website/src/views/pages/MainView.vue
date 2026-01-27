@@ -23,7 +23,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div>
+  <div class="container">
     <h1>Главная</h1>
     <p v-if="!courses || !themes">Загрузка...</p>
     <div v-if="courses && themes">

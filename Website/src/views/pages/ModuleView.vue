@@ -33,14 +33,18 @@ onMounted(async () => {
       <span>Описание:</span>
       <input v-model="module.description" />
     </label>
+    <RouterLink :to="`/courses/${module.courseId}`">Вернуться к списку модулей</RouterLink>
   </div>
   <div class="module-lessons-div" v-if="lessons">
     <h3>Занятия</h3>
     <div class="block-list-hor">
-      <div v-for="lesson in lessons">
+      <div v-for="lesson in lessons" :class="{is_control: lesson.lessonTypeId == 2, is_study: lesson.lessonTypeId == 1}"
+      :style="{order: lesson.order}">
         <p>
-            <RouterLink :to="`/courses/modules/lessons/${lesson.id}`">{{ lesson.name }}</RouterLink>
-          
+          <RouterLink :to="`/courses/modules/lessons/${lesson.id}`">{{ lesson.name }}</RouterLink>
+        </p>
+        <p>
+          {{ lesson.description }}
         </p>
       </div>
     </div>
@@ -49,3 +53,12 @@ onMounted(async () => {
     <button @click="saveChanges">Сохранить</button>
   </div>
 </template>
+
+<style scoped>
+  .is_control {
+    background-color: red;
+  }
+  .is_study {
+    background-color: blue;
+  }
+</style>
