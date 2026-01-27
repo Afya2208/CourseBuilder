@@ -18,20 +18,35 @@ export interface Lesson {
   name: string
    description?: string
 }
-export interface Task extends LessonContent {
-
+export interface Task {
+  taskTypeId: number
+  order: number,
+  id: number,
+  question: string
 }
-export interface ContentBlock extends LessonContent {
+export interface TaskAnswer {
+  textValue?: string
+  file?: Uint8Array,
+  fileName?: string,
+  isRight?: boolean,
+  taskId: number
+}
+export interface Correlation {
+  left: string,
+  right: string,
+  id: number
+}
+export interface ContentBlock {
   contentBlockTypeId: number,
+  order: number,
+  id: number,
   textValue?: string,
   fileName?: string,
   fileUrl?: string,
-  id: number,
+  
   name:string
 }
-export interface LessonContent {
-  order: number,
-}
+
 
 export interface Module {
   id: number

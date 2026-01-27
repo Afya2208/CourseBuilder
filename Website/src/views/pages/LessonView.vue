@@ -1,16 +1,15 @@
 <script setup lang="ts">
-import type { Lesson, LessonContent, Task, ContentBlock } from '@/models/main'
+import type { Lesson, Task, ContentBlock } from '@/models/main'
 import api from '@/services/api'
 import { onMounted, ref, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 import ContentBlockView from '../components/ContentBlockView.vue'
+import TaskView from '../components/TaskView.vue'
 
+const lessonId = useRoute().params.lessonId
 const lesson = ref<Lesson>()
 const contentBlocks = ref<ContentBlock[]>()
 const tasks = ref<Task[]>()
-const lessonContent = ref<LessonContent[]>()
-
-const lessonId = useRoute().params.lessonId
 
 const getData = async () => {
   await api.get<Lesson>(`lessons/${lessonId}`).then((res) => {
@@ -18,14 +17,11 @@ const getData = async () => {
   })
   await api.get<Task[]>(`lessons/${lessonId}/tasks`).then(res=>{
     tasks.value = res.data
+    console.log(JSON.stringify(tasks.value))
   })
   await api.get<ContentBlock[]>(`lessons/${lessonId}/content-blocks`).then(res=>{
     contentBlocks.value = res.data
   })
-  if (tasks.value && contentBlocks.value) {
-    let lessonContentTasksAndBlocks: LessonContent[] = [...tasks.value, ...contentBlocks.value]
-    lessonContent.value = lessonContentTasksAndBlocks.sort((a, b) => a.order - b.order)
-  }
 }
 
 onMounted(async () => {
@@ -45,9 +41,13 @@ onMounted(async () => {
       <input v-model="lesson.description" />
     </label>
   </div>
-  <div class="lesson-content-div" v-if="lessonContent">
+  <div class="lesson-content-div" v-if="contentBlocks">
     <h2>Содержание занятия</h2>
-    <ContentBlockView v-for="contentBlock in contentBlocks" :content="contentBlock"/>
+      <ContentBlockView v-for="contentBlock in contentBlocks" :content="contentBlock"/>
+  </div>
+  <div class="lesson-tasks-div" v-if="tasks">
+    <h2>Задания занятия</h2>
+    <TaskView v-for="task in tasks" :task="task"/>
   </div>
 </template>
 
