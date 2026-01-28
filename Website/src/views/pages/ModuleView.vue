@@ -12,13 +12,13 @@ const getData = async () => {
   await api.get<Module>(`modules/${moduleId}`).then((res) => {
     module.value = res.data
   })
-  await api.get<Lesson[]>(`modules/${moduleId}/lessons`).then(res=>{
-        lessons.value = res.data
+  await api.get<Lesson[]>(`modules/${moduleId}/lessons`).then((res) => {
+    lessons.value = res.data
   })
 }
 const saveChanges = async () => {}
 onMounted(async () => {
-    await getData()
+  await getData()
 })
 </script>
 
@@ -38,8 +38,11 @@ onMounted(async () => {
   <div class="module-lessons-div" v-if="lessons">
     <h3>Занятия</h3>
     <div class="block-list-hor">
-      <div v-for="lesson in lessons" :class="{is_control: lesson.lessonTypeId == 2, is_study: lesson.lessonTypeId == 1}"
-      :style="{order: lesson.order}">
+      <div
+        v-for="lesson in lessons"
+        :class="{ is_control: lesson.lessonTypeId == 2, is_study: lesson.lessonTypeId == 1 }"
+        :style="{ order: lesson.order }"
+      >
         <p>
           <RouterLink :to="`/courses/modules/lessons/${lesson.id}`">{{ lesson.name }}</RouterLink>
         </p>
@@ -55,10 +58,10 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-  .is_control {
-    background-color: red;
-  }
-  .is_study {
-    background-color: blue;
-  }
+.is_control {
+  background-color: red;
+}
+.is_study {
+  background-color: blue;
+}
 </style>

@@ -9,6 +9,36 @@ namespace Models.Dto
 {
     public static class DtoConverter
     {
+        public static UserDto ToDto(this User entity)
+        {
+            var dto = new UserDto()
+            {
+                Id = entity.Id,
+                Email = entity.Email
+            };
+            if (entity.Role != null)
+            {
+                dto.Role = new RoleDto()
+                {
+                    Id = entity.RoleId,
+                    Name = entity.Role.Name  
+                };
+            }
+            if (entity.UserInformation != null)
+            {
+                var info = entity.UserInformation;
+                dto.UserInformation = new UserInformationDto()
+                {
+                    FirstName = info.FirstName,
+                    LastName = info.LastName,
+                    Phone = info.Phone,
+                    Position = info.Position,
+                    MiddleName = info.MiddleName,
+                    UserId = info.UserId
+                };
+            }
+            return dto;
+        }
         public static LessonDto ToDto(this Lesson entity)
         {
             var dto = new LessonDto()
@@ -79,19 +109,6 @@ namespace Models.Dto
                 Id = entity.Id,
                 Name = entity.Name
             };
-            return dto;
-        }
-        public static UserDto ToFullDto(this User entity)
-        {
-            var dto = new UserDto()
-            {
-                Id = entity.Id,
-                Email = entity.Email,
-            };
-            dto.Role = new RoleDto()
-            {
-            };
-            dto.UserInformation = new UserInformationDto();
             return dto;
         }
         public static Theme ToEntity(this ThemeDto dto)

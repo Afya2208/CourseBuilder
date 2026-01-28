@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { ProblemDetails, User } from '@/models/main'
+import type { ProblemDetails, SignInResponse, User } from '@/models/main'
 import api from '@/services/api'
 import { useUserStore } from '@/stores/user'
 import { ref } from 'vue'
@@ -10,32 +10,45 @@ const passwordHidden = ref(true)
 const router = useRouter()
 const password = ref('')
 const authClick = async () => {
-  await api.post<User>('sign-in', { email: email.value, password: password.value })
+    let signInRequest = {
+        email: email.value,
+        password: password.value
+    }
+    await api.post<SignInResponse>('sign-in', signInRequest)
     .then((res) => {
-    if (res.data) {
-      api.defaults.headers.common = { Authorization: `Bearer ${res.data.token}` }
-      sessionStorage.setItem('token', res.data.token)
-      sessionStorage.setItem('userId', res.data.userId.toString())
-      useUserStore().signIn(res.data)
-      router.push({ path: '/' })
-    }})
+        let signInResponse = res.data
+        api.defaults.headers.common = { Authorization: `Bearer ${signInResponse.token}` }
+        sessionStorage.setItem('token', signInResponse.token)
+        sessionStorage.setItem('userId', signInResponse.user.id.toString())
+        useUserStore().signIn(signInResponse)
+        router.push({ path: '/' })
+    })
 }
 </script>
 
 <template>
-  <div class="container text-center" style="max-width: 300px;">
-    <form>
-        <h1 class="h3 mb-3 fw-normal">Авторизация</h1>
-        <div class="form-floating my-1 ">
-            <input v-model="email" type="email" id="email" class="form-control" placeholder="example@domain.com"/>
-            <label for="email">Email</label>
-        </div>
-         <div class="form-floating my-1">
-            <input type="password" id="password" class="form-control" placeholder="Пароль"/>
-            <label for="password">Пароль</label>
-        </div>
-      <button @click="authClick" type="button" class="my-button btn btn-lg btn-primary my-1">Войти</button>
-      <p class="mt-5 mb-3 text-muted">Если у Вас нет профиля, то обратитесь к администрации</p>
-    </form>
-</div>
+    <div class="container text-center" style="max-width: 300px">
+        <form>
+            <h1 class="h3 mb-3 fw-normal">Авторизация</h1>
+            <div class="form-floating my-1">
+                <input
+                    v-model="email"
+                    type="email"
+                    id="email"
+                    class="form-control"
+                    placeholder="example@domain.com"
+                />
+                <label for="email">Email</label>
+            </div>
+            <div class="form-floating my-1">
+                <input type="password" id="password" v-model="password"
+                class="form-control" placeholder="Пароль" />
+                <label for="password">Пароль</label>
+            </div>
+            <button @click="authClick" type="button" class="my-button btn btn-lg btn-primary my-1">
+                Войти
+            </button>
+            <p class="mt-5 mb-3 text-muted">Если у Вас нет профиля, то обратитесь к администрации</p>
+        </form>
+    </div>
 </template>

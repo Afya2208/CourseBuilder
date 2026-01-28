@@ -24,13 +24,13 @@ const router = createRouter({
     {
       path: '/courses/modules/:moduleId',
       name: 'module-page',
-      component: () => import('../views/pages/ModuleView.vue')
+      component: () => import('../views/pages/ModuleView.vue'),
     },
     {
-      path:'/courses/modules/lessons/:lessonId',
-      name:'lesson-page',
-      component: () => import('../views/pages/LessonView.vue')
-    }
+      path: '/courses/modules/lessons/:lessonId',
+      name: 'lesson-page',
+      component: () => import('../views/pages/LessonView.vue'),
+    },
   ],
 })
 

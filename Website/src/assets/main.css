@@ -1,24 +1,24 @@
 @import 'bootstrap';
 
 .li-block-title {
-    color: aqua;
-    background-color: blue;
+  color: aqua;
+  background-color: blue;
 }
 
 .block-list-hor {
-     list-style: none;
-     background-color: blueviolet;
-     border: solid slateblue 4px;
-      border-radius: 10px;
-      padding: 5px;
-      display: flex;
-    flex-wrap: wrap;
+  list-style: none;
+  background-color: blueviolet;
+  border: solid slateblue 4px;
+  border-radius: 10px;
+  padding: 5px;
+  display: flex;
+  flex-wrap: wrap;
 }
 .block-list-hor > div {
-     border: solid red 4px;
-      border-radius: 10px;
-      margin: 5px;
-      padding: 5px;
+  border: solid red 4px;
+  border-radius: 10px;
+  margin: 5px;
+  padding: 5px;
 }
 
 *,
@@ -36,11 +36,7 @@ body {
     color 0.5s,
     background-color 0.5s;
   line-height: 1.6;
-  font-family:
-    'Segoe UI',
-    'Inter',
-    'Fira Sans',
-    sans-serif;
+  font-family: 'Segoe UI', 'Inter', 'Fira Sans', sans-serif;
   font-size: 15px;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;

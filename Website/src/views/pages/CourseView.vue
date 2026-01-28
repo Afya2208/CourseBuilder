@@ -11,13 +11,13 @@ const getData = async () => {
   await api.get<Course>(`courses/${courseId}`).then((res) => {
     course.value = res.data
   })
-  await api.get<Module[]>(`courses/${courseId}/modules`).then(res=>{
-        modules.value = res.data
+  await api.get<Module[]>(`courses/${courseId}/modules`).then((res) => {
+    modules.value = res.data
   })
 }
 const saveChanges = async () => {}
 onMounted(async () => {
-    await getData()
+  await getData()
 })
 </script>
 
@@ -41,21 +41,21 @@ onMounted(async () => {
     <h3>Темы</h3>
     <span>+</span>
     <ul>
-        <li v-for="theme in course.themes">
-            <p>{{ theme.name }}</p>
-        </li>
+      <li v-for="theme in course.themes">
+        <p>{{ theme.name }}</p>
+      </li>
     </ul>
   </div>
   <div class="course-modules-div" v-if="modules">
     <h3>Модули</h3>
     <div class="block-list-hor">
-      <div v-for="module in modules" :style="{order: module.order}">
+      <div v-for="module in modules" :style="{ order: module.order }">
         <p>
           <RouterLink :to="`/courses/modules/${module.id}`">{{ module.name }}</RouterLink>
           <span class="li-block-title"></span>
-          <br/>
+          <br />
           {{ module.description }}
-          <br/>
+          <br />
           Количество занятий: {{ module.lessonsCount }}
         </p>
       </div>
@@ -66,6 +66,4 @@ onMounted(async () => {
   </div>
 </template>
 
-<style scoped >
-    
-</style>
+<style scoped></style>

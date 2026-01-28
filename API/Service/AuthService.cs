@@ -24,16 +24,11 @@ namespace API.Service
             if (!passwordHashFromRequest.SequenceEqual(user.Password)) throw new AuthenticationException("Неправильный пароль или логин");
 
             var token =  JwtTokens.GenerateToken(configuration, user);
+            var userDto = user.ToDto();
             return new SignInResponse()
             {
                 Token = token,
-                LastName = user.UserInformation?.LastName,
-                FirstName = user.UserInformation?.FirstName,
-                MiddleName = user.UserInformation?.MiddleName,
-                Position = user.UserInformation?.Position,
-                RoleId = user.RoleId,
-                RoleName = user.Role.Name,
-                UserId = user.Id,
+                User = userDto
             };
         }
         public async Task<bool> SignUpAsync(SignUpRequest request)

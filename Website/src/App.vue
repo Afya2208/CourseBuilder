@@ -1,33 +1,37 @@
 <script setup lang="ts">
 import { RouterLink, RouterView } from 'vue-router'
 import { useUserStore } from './stores/user'
-import { getUserData } from './util/userMethods'
+import { tryGetUser } from './util/userMethods'
 import { onMounted } from 'vue'
 import { storeToRefs } from 'pinia'
 import api from './services/api'
 
 // хранилище данных пользователя
-const { fullName } = storeToRefs(useUserStore())
+const { user, fullName } = storeToRefs(useUserStore())
 // при каждой загрузке App, то есть всего сайта
 onMounted(async () => {
   // пробуем загрузить данные пользователя из хранилища браузера
-  const user = await getUserData()
-  if (user) {
-    // сохраняем пользователя в хранилище приложения
-    useUserStore().signIn(user)
+  await tryGetUser()
+  .then(response => {
+    useUserStore().saveUser(response)
     api.defaults.headers.common.Authorization = `Bearer ${sessionStorage.getItem('token')}`
-  }
+  }) 
 })
 </script>
 
 <template>
-  <header >
+  <header>
     <div class="px-3 py-2 bg-dark text-white">
-        <div class="container">
-            <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-                <a href="/" class="d-flex  align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none">
-                    CourseBuilder
-                </a>
+      <div class="container">
+        <div
+          class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
+        >
+          <a
+            href="/"
+            class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none"
+          >
+            CourseBuilder
+          </a>
           <!--
           
           <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
@@ -63,23 +67,30 @@ onMounted(async () => {
             </li>
           </ul>
           -->
-            </div>
         </div>
+      </div>
     </div>
 
     <nav class="px-3 py-2 bg-light border-bottom">
-        <div class="container d-flex flex-wrap">
+      <div class="container d-flex flex-wrap">
         <ul class="nav me-auto">
-            <li class="nav-item"><RouterLink class="nav-link link-dark pr-2" to="/">Курсы</RouterLink></li>
-            <li class="nav-item"><RouterLink class="nav-link link-dark px-2" to="/admin">Администрирование</RouterLink></li>
-            <li class="nav-item"><a href="#" class="nav-link link-dark px-2 active" aria-current="page">Главная</a></li>
+          <li class="nav-item">
+            <RouterLink class="nav-link link-dark pr-2" to="/">Курсы</RouterLink>
+          </li>
+          <li class="nav-item">
+            <RouterLink class="nav-link link-dark px-2" to="/admin">Администрирование</RouterLink>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link link-dark px-2 active" aria-current="page">Главная</a>
+          </li>
         </ul>
         <ul class="nav">
-            <li class="nav-item"><RouterLink class="nav-link link-dark px-2" to="/auth">Авторизация</RouterLink></li>
+          <li class="nav-item">
+            <RouterLink class="nav-link link-dark px-2" to="/auth">Авторизация</RouterLink>
+          </li>
         </ul>
-        </div>
+      </div>
     </nav>
-
 
     ---------------------------
     <div>
