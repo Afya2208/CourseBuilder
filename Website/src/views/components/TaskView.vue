@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import type { Correlation, Task, TaskAnswer } from '@/models/main'
+import type { Correlation, Task, TaskAnswer, UserAnswer } from '@/models/main'
 import api from '@/services/api'
 import { indexToChar, mixCorrelations, randomInt } from '@/util/methods'
 import { onMounted, ref } from 'vue'
@@ -10,18 +10,92 @@ const props = defineProps<{
 const theTask = ref(props.task)
 const answer = ref<TaskAnswer>()
 const answerOptions = ref<TaskAnswer[]>([])
-const userAnswer = ref<TaskAnswer>({
+const userAnswer = ref<UserAnswer>({
   textValue: '',
   file: undefined,
   fileName: '',
-  isRight: false,
+  isRight: undefined,
   taskId: theTask.value.id,
+  selectedTaskAnswersId: [],
+  selectedTaskAnswerId: 0
 })
 const userCorrelations = ref<Correlation[]>([])
-const correlations = ref<Correlation[]>()
+const correlations = ref<Correlation[]>([])
 onMounted(async () => {
   await loadData()
 })
+const checkTask = async () => {
+    switch(theTask.value.taskTypeId) {
+        case 1: {
+            await api.get<TaskAnswer[]>(`tasks/${theTask.value.id}/answers`)
+            .then(res => {
+                let answer = res.data.pop()
+                if (answer?.textValue === userAnswer.value.textValue) userAnswer.value.isRight = true
+                else userAnswer.value.isRight = false
+            })
+            break
+        }
+        case 2: {
+            await api.post("task-answers", userAnswer.value)
+            .then(res => {
+                // ааа
+            })
+            break
+        }
+        case 3: {
+            let i = 0
+            let areAllRight = true
+            for (;i < correlations.value.length; i++) {
+                let indexOfLeft = i;
+                let userInput = userCorrelations.value[i]
+                if (userInput) {
+                    let startCode = "a".charCodeAt(0)
+                    let userChar = userInput.right
+                    let index = userChar.charCodeAt(0) - startCode
+                    areAllRight = indexOfLeft == index
+                    if (!areAllRight) break
+                }   
+                else {
+                    areAllRight = false
+                    break
+                }
+            }
+            userAnswer.value.isRight = areAllRight
+            break
+        }
+        case 4: {
+            let selectedAnswer = answerOptions.value.find(x=> x.id == userAnswer.value.selectedTaskAnswerId)
+            if (selectedAnswer) {
+                userAnswer.value.isRight = selectedAnswer.isRight
+            }
+            else {
+                userAnswer.value.isRight = false
+            }
+            break
+        }
+        case 5: {
+            let areAllRight = true
+            for (let answer of answerOptions.value) {
+                let didUserSelectIt = userAnswer.value.selectedTaskAnswersId.includes(answer.id)
+                if (didUserSelectIt && !answer.isRight || answer.isRight && !didUserSelectIt) {
+                    areAllRight = false
+                    break
+                }
+            }
+            userAnswer.value.isRight = areAllRight
+            break
+        }
+        // сохранение файла в базе
+        case 6: {
+            await api.post("task-answers", userAnswer.value)
+            .then(res => {
+                
+            })
+            break
+        }
+    }
+}
+defineExpose({checkTask})
 const loadData = async () => {
   // 1 - простая задача  ответ-готовый точный 1 ответ => проверка может быть на месте
   if (theTask.value.taskTypeId == 1) {
@@ -77,8 +151,10 @@ const loadData = async () => {
   }
 }
 </script>
+
+
 <template>
-  <div>
+  <div :class="{is_right: userAnswer.isRight == true, is_false: userAnswer.isRight == false}">
     <div v-if="theTask.taskTypeId == 1 || theTask.taskTypeId == 2">
       <p>{{ theTask.question }}</p>
       <p>
@@ -115,10 +191,18 @@ const loadData = async () => {
         </tbody>
       </table>
     </div>
-    <div v-else-if="theTask.taskTypeId == 4 || theTask.taskTypeId == 5">
+    <div v-else-if="theTask.taskTypeId == 4">
+        <p>{{ theTask.question }}</p>
+        <select v-model="userAnswer.selectedTaskAnswerId" size="5" >
+            <option v-for="answerOption in answerOptions" :value="answerOption.id">
+            {{ answerOption.textValue }}
+            </option>
+        </select>
+    </div>
+    <div v-else-if="theTask.taskTypeId == 5">
       <p>{{ theTask.question }}</p>
-      <select size="5" :multiple="theTask.taskTypeId == 5">
-        <option v-for="answerOption in answerOptions" :value="answerOption.textValue">
+      <select v-model="userAnswer.selectedTaskAnswersId" size="5" multiple>
+        <option v-for="answerOption in answerOptions" :value="answerOption.id">
           {{ answerOption.textValue }}
         </option>
       </select>
@@ -135,4 +219,11 @@ const loadData = async () => {
   </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+    .is_right {
+        background-color: green;
+    }
+    .is_false {
+        background-color: red;
+    }
+</style>

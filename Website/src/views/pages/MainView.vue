@@ -5,6 +5,7 @@ import { onMounted, provide, ref } from 'vue'
 import ThemeListView from '../components/ThemeListView.vue'
 import CourseListView from '../components/CourseListView.vue'
 import LessonEditorView from './LessonEditorView.vue'
+import ThemeFormView from '../components/ThemeFormView.vue'
 
 const courses = ref<Course[]>()
 const themes = ref<Theme[]>()
@@ -26,6 +27,11 @@ onMounted(async () => {
 <template>
   <div class="container">
     <h1>Главная</h1>
+    <button data-bs-toggle="modal" data-bs-target="#addThemeForm">
+        Добавить тему
+    </button>
+    <ThemeFormView id="addThemeForm"/>
+    <b-modal></b-modal>
     <p v-if="!courses || !themes">Загрузка...</p>
     <div v-if="courses && themes">
       <h2>Темы</h2>
@@ -33,6 +39,6 @@ onMounted(async () => {
       <h2>Курсы</h2>
       <CourseListView />
     </div>
-    <LessonEditorView/>
+    <LessonEditorView />
   </div>
 </template>

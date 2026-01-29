@@ -11,11 +11,10 @@ const { user, fullName } = storeToRefs(useUserStore())
 // при каждой загрузке App, то есть всего сайта
 onMounted(async () => {
   // пробуем загрузить данные пользователя из хранилища браузера
-  await tryGetUser()
-  .then(response => {
+  await tryGetUser().then((response) => {
     useUserStore().saveUser(response)
     api.defaults.headers.common.Authorization = `Bearer ${sessionStorage.getItem('token')}`
-  }) 
+  })
 })
 </script>
 

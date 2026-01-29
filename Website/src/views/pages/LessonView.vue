@@ -10,6 +10,7 @@ const lessonId = useRoute().params.lessonId
 const lesson = ref<Lesson>()
 const contentBlocks = ref<ContentBlock[]>([])
 const tasks = ref<Task[]>([])
+const refsToTaskViews = ref([])
 const getData = async () => {
   await api.get<Lesson>(`lessons/${lessonId}`).then((res) => {
     lesson.value = res.data
@@ -21,6 +22,10 @@ const getData = async () => {
   await api.get<ContentBlock[]>(`lessons/${lessonId}/content-blocks`).then((res) => {
     contentBlocks.value = res.data
   })
+}
+
+const checkTasks = async () => {
+    refsToTaskViews.value.forEach(x=>x.checkTask())
 }
 
 onMounted(async () => {
@@ -50,7 +55,8 @@ onMounted(async () => {
     </div>
     <div class="lesson-tasks-div" v-if="tasks.length > 0">
       <h2>Задания занятия</h2>
-      <TaskView v-for="task in tasks" :task="task" />
+      <TaskView v-for="task, index in tasks" :task="task" :ref="(ref) => { if (ref) refsToTaskViews[index] = ref}" />
+      <button @click="checkTasks">Проверить задания</button>
     </div>
   </div>
 </template>
