@@ -41,6 +41,7 @@ builder.Services.AddTransient<RoleRepository>();
 builder.Services.AddTransient<LessonRepository>();
 builder.Services.AddTransient<TaskAnswerRepository>();
 builder.Services.AddTransient<ContentBlockRepository>();
+builder.Services.AddTransient<ContentBlockTypeRepository>();
 builder.Services.AddTransient<TaskRepository>();
 builder.Services.AddTransient<CorrelationRepository>();
 builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
