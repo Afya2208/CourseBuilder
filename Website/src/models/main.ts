@@ -39,6 +39,10 @@ export interface Correlation {
     right: string
     id: number
 }
+export interface ContentBlockType{
+    id: number,
+    name:string
+}
 export interface ContentBlock {
     contentBlockTypeId: number
     order: number
