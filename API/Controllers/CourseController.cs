@@ -14,8 +14,8 @@ namespace API.Controllers
 {
     [ApiController]
     [Route("courses")]
-    public class CourseController(CourseRepository courseRepository, ModuleRepository moduleRepository,
-        LessonRepository lessonRepository) : ControllerBase
+    public class CourseController(CourseRepository courseRepository,
+        ModuleRepository moduleRepository, LessonRepository lessonRepository) : ControllerBase
     {
         [HttpGet]
         public async Task<IActionResult> FindAll()
@@ -37,19 +37,19 @@ namespace API.Controllers
             return Ok(course.ToDto());
         }
         [HttpPost]
-        [Authorize]
-        public async Task<IActionResult> Add([FromBody] Course course)
+        [Authorize(Roles="Разработчик")]
+        public async Task<IActionResult> Add([FromBody] AddUpdateCourseRequest addCourseRequest)
         {
-            return Ok(await courseRepository.AddAsync(course));
+            return Ok(await courseRepository.AddAsync(addCourseRequest));
         }
         [HttpPut]
-        [Authorize]
-        public async Task<IActionResult> Update([FromBody] Course course)
+        [Authorize(Roles="Разработчик")]
+        public async Task<IActionResult> Update([FromBody] AddUpdateCourseRequest updateCourseRequest)
         {
-             return Ok(await courseRepository.UpdateAsync(course));
+             return Ok(await courseRepository.UpdateAsync(updateCourseRequest));
         }
         [HttpDelete("{courseId:int}")]
-        [Authorize]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Delete(int courseId)
         {
              return Ok(await courseRepository.DeleteAsync(courseId));

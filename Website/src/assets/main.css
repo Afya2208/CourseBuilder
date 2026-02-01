@@ -1,44 +1,36 @@
-@import 'bootstrap';
+@import "bootstrap";
 
 .li-block-title {
-  color: aqua;
-  background-color: blue;
+    color: aqua;
+    background-color: blue;
 }
 
 .block-list-hor {
-  list-style: none;
-  background-color: blueviolet;
-  border: solid slateblue 4px;
-  border-radius: 10px;
-  padding: 5px;
-  display: flex;
-  flex-wrap: wrap;
+    list-style: none;
+    background-color: blueviolet;
+    border: solid slateblue 4px;
+    border-radius: 10px;
+    padding: 5px;
+    display: flex;
+    flex-wrap: wrap;
 }
 .block-list-hor > div {
-  border: solid red 4px;
-  border-radius: 10px;
-  margin: 5px;
-  padding: 5px;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  font-weight: normal;
+    border: solid red 4px;
+    border-radius: 10px;
+    margin: 5px;
+    padding: 5px;
 }
 
 body {
-  min-height: 100vh;
-  color: rgb(201, 22, 22);
-  transition:
-    color 0.5s,
-    background-color 0.5s;
-  line-height: 1.6;
-  font-family: 'Segoe UI', 'Inter', 'Fira Sans', sans-serif;
-  font-size: 15px;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    color: black;
+    transition:
+        color 0.5s,
+        background-color 0.5s;
+    line-height: 1.6;
+    font-family: 'Segoe UI', 'Inter', 'Fira Sans', sans-serif;
+    font-size: 16px;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }

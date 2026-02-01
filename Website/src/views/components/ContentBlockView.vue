@@ -51,7 +51,7 @@ const downloadFile = async () => {
         <p v-html="content.textValue"></p>
     </div>
      <div class="image_div" v-else-if="content.contentBlockTypeId == 2"> <!--image file-->
-        <img  alt="Изображение" :src="content.fileUrl"></img>
+        <img  alt="Изображение" :src="content.fileUrl"/>
         <p>{{ content.name }}</p>
     </div>
     <div class="pdf_div" v-else-if="content.contentBlockTypeId == 3"> <!--pdf file-->

@@ -18,6 +18,7 @@ namespace API.Controllers
     public class UserController(UserRepository userRepository, AuthService authService) : ControllerBase
     {
         [HttpGet("users")]
+        [Authorize(Roles="Администратор")]
         public async Task<IActionResult> FindAll()
         {
             return Ok(await userRepository.FindAllAsync());
@@ -35,8 +36,9 @@ namespace API.Controllers
         {
             return Ok(await authService.SignInAsync(request));
         }
-        [AllowAnonymous]
+
         [HttpPost("sign-up")]
+        [Authorize(Roles="Администратор")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
         {
             return Ok(await authService.SignUpAsync(request));

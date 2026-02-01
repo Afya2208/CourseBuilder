@@ -15,16 +15,17 @@ namespace API.Util
     {
         public static string GenerateToken(IConfiguration appConfiguration, User user)
         {
-            List<Claim> claims= new List<Claim>()
+            List<Claim> claims = new List<Claim>()
             {
                 new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Role, user.Role.Name)
             };
+            var identity = new ClaimsIdentity(claims, "JWT", ClaimTypes.Email, ClaimTypes.Role);
             var now = DateTime.UtcNow;
             var token = new JwtSecurityToken(
                 notBefore:now,
                 expires: now.AddHours(12),
-                claims: claims,
+                claims: identity.Claims,
                 audience: appConfiguration["JWT:Audience"],
                 issuer: appConfiguration["JWT:Issuer"],
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appConfiguration["JWT:Secret"])), SecurityAlgorithms.HmacSha256)

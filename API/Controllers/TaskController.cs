@@ -30,6 +30,7 @@ namespace API.Controllers
 
         // 3. Удаление задачи
         [HttpDelete("tasks/{taskId:long}")]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Delete(long taskId)
         {  
             return Ok(await taskRepository.DeleteAsync(taskId));

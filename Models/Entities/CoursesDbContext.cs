@@ -14,12 +14,6 @@ public partial class CoursesDbContext : DbContext
         : base(options)
     {
     }
-    
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-        //options.UseNpgsql("username=postgres;password=1234;host=localhost;port=5432;database=courses_db");
-    }
-
 
     public virtual DbSet<ContentBlock> ContentBlocks { get; set; }
 
@@ -48,6 +42,11 @@ public partial class CoursesDbContext : DbContext
     public virtual DbSet<User> Users { get; set; }
 
     public virtual DbSet<UserInformation> UserInformations { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        //
+    }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -139,7 +138,7 @@ public partial class CoursesDbContext : DbContext
                 .HasDefaultValue(100)
                 .HasColumnName("minimal_completion_percentage");
             entity.Property(e => e.ModulesHaveOrder)
-                .HasDefaultValue(false)
+                .HasDefaultValue(true)
                 .HasColumnName("modules_have_order");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
@@ -272,7 +271,7 @@ public partial class CoursesDbContext : DbContext
             entity.Property(e => e.CourseId).HasColumnName("course_id");
             entity.Property(e => e.Description).HasColumnName("description");
             entity.Property(e => e.LessonsHaveOrder)
-                .HasDefaultValue(false)
+                .HasDefaultValue(true)
                 .HasColumnName("lessons_have_order");
             entity.Property(e => e.Name)
                 .HasMaxLength(100)
@@ -344,11 +343,16 @@ public partial class CoursesDbContext : DbContext
             entity.Property(e => e.IsRight).HasColumnName("is_right");
             entity.Property(e => e.TaskId).HasColumnName("task_id");
             entity.Property(e => e.TextValue).HasColumnName("text_value");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
 
             entity.HasOne(d => d.Task).WithMany(p => p.TaskAnswers)
                 .HasForeignKey(d => d.TaskId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("task_answer_task_id_fkey");
+
+            entity.HasOne(d => d.User).WithMany(p => p.TaskAnswers)
+                .HasForeignKey(d => d.UserId)
+                .HasConstraintName("task_answer_user_id_fkey");
         });
 
         modelBuilder.Entity<TaskType>(entity =>

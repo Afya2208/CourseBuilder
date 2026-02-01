@@ -10,7 +10,6 @@ using Models.Entities;
 namespace API.Controllers
 {
     [ApiController]
-
     public class TaskAnswerController(TaskAnswerRepository taskAnswerRepository) : ControllerBase
     {
         [HttpGet("tasks/{taskId:long}/answers")]
@@ -19,19 +18,19 @@ namespace API.Controllers
             return Ok(await taskAnswerRepository.FindAllByConditionAsync(x=>x.TaskId == taskId));
         }
         [HttpPost("task-answers")]
-        [Authorize]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Add([FromBody] TaskAnswer taskAnswerDto)
         {
             return Ok(await taskAnswerRepository.AddAsync(taskAnswerDto));
         }
         [HttpPut("task-answers")]
-        [Authorize]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Update([FromBody] TaskAnswer taskAnswerDto)
         {
              return Ok(await taskAnswerRepository.UpdateAsync(taskAnswerDto));
         }
         [HttpDelete("task-answers/{themeId:int}")]
-        [Authorize]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Delete(int taskAnswerId)
         {
              return Ok(await taskAnswerRepository.DeleteAsync(taskAnswerId));

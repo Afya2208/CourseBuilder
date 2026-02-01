@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Models.Dto;
 using Models.Entities;
 
@@ -21,22 +22,21 @@ namespace API.Controllers
             return Ok(await themeRepository.FindAllAsync());
         }
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> Add([FromBody] Theme theme)
         {
             return Ok(await themeRepository.AddAsync(theme));
         }
         [HttpPut]
-        [Authorize]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Update([FromBody] Theme themeToUpdate)
         {
              return Ok(await themeRepository.UpdateAsync(themeToUpdate));
         }
-        [HttpDelete("themeId:int")]
-        [Authorize]
+        [HttpDelete("{themeId:int}")]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Delete(int themeId)
         {
-             return Ok(await themeRepository.DeleteAsync(themeId));
+            return Ok(await themeRepository.DeleteAsync(themeId));
         }
     }
 }

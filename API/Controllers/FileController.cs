@@ -7,11 +7,11 @@ namespace API.Controllers;
 [ApiController]
 public class FileController(CoursesDbContext context) : ControllerBase
 {
-    [HttpGet("content-blocks/{contentBlockId:long}/file/{fileName}")]
-    public async Task<IActionResult> FindFileByBlockIdAndName(long contentBlockId, string fileName)
+    [HttpGet("content-blocks/{contentBlockId:long}/file")]
+    public async Task<IActionResult> FindFileById(long contentBlockId)
     {
-        var file = await context.ContentBlocks.FirstOrDefaultAsync(e => e.Id == contentBlockId && e.FileName == fileName);
-        if (file == null || file.File == null) throw new NotFoundException($"Файл {fileName} не найден");
+        var file = await context.ContentBlocks.FirstOrDefaultAsync(e => e.Id == contentBlockId);
+        if (file == null || file.File == null) throw new NotFoundException($"Файл не найден");
         var mimeType = file.FileName.Split('.').Last() switch
         {
             "png" => "image/png",
@@ -23,11 +23,11 @@ public class FileController(CoursesDbContext context) : ControllerBase
         };
         return File(file.File, mimeType, file.FileName);
     }
-    [HttpGet("content-blocks/{contentBlockId:long}/file-stream/{fileName}")]
-    public async Task<IActionResult> GetFileStreamByBlockIdAndName(long contentBlockId, string fileName)
+    [HttpGet("content-blocks/{contentBlockId:long}/file-stream")]
+    public async Task<IActionResult> FindFileStreamById(long contentBlockId)
     {
-        var file = await context.ContentBlocks.FirstOrDefaultAsync(e => e.Id == contentBlockId && e.FileName == fileName);
-        if (file == null || file.File == null) throw new NotFoundException($"Файл {fileName} не найден");
+        var file = await context.ContentBlocks.FirstOrDefaultAsync(e => e.Id == contentBlockId);
+        if (file == null || file.File == null) throw new NotFoundException($"Файл не найден");
         return File(file.File, "application/octet-stream", file.FileName);
     }
 }

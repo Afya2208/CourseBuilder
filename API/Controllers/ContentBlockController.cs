@@ -3,13 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Entities;
 
 namespace API.Controllers
 {
     [ApiController]
-    public class ContentBlockController(ContentBlockRepository contentBlockRepository, ContentBlockTypeRepository contentBlockTypeRepository) : ControllerBase
+    public class ContentBlockController(ContentBlockRepository contentBlockRepository,
+    ContentBlockTypeRepository contentBlockTypeRepository) : ControllerBase
     {
         [HttpGet("lessons/{lessonId:long}/content-blocks")]
         public async Task<IActionResult> FindByLessonId(long lessonId)
@@ -18,7 +20,8 @@ namespace API.Controllers
             return Ok(contentBlocks);
         }
 
-         [HttpGet("content-block-types")]
+        [HttpGet("content-block-types")]
+        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> FindAllTypes()
         {
             var contentBlocks = await contentBlockTypeRepository.FindAllAsync();

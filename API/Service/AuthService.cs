@@ -28,7 +28,7 @@ namespace API.Service
             return new SignInResponse()
             {
                 Token = token,
-                User = userDto
+                User = userDto 
             };
         }
         public async Task<bool> SignUpAsync(SignUpRequest request)

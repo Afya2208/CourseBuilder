@@ -6,9 +6,14 @@
 
 Веб-интерфейс разработан на Vue.js 3 на TypeScript + Vite
 
+Дизайн сделан с помощью Bootstrap 5 + BootstrapVueNext
+
 ## Библиотеки TypeScript
 | Название   |Версия|
 |------------|--|
 | vue-router |4.6.3|
 | pinia      |3.0.3|
 | axios      |1.13.2|
+| bootstrap-vue-next |0.42.0|
+| bootstrap      |5.3.8|
+|vue-component-type-helpers |3.2.4|

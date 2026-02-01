@@ -11,9 +11,7 @@ using Models.Entities;
 namespace API.Controllers
 {
     [ApiController]
-    public class LessonController(LessonRepository lessonRepository,
-        TaskRepository taskRepository, ContentBlockRepository contentBlockRepository,
-        TaskAnswerRepository taskAnswerRepository, CorrelationRepository correlationRepository) : ControllerBase
+    public class LessonController(LessonRepository lessonRepository) : ControllerBase
     {
 
         [HttpGet("lessons/{lessonId:long}")]
@@ -29,26 +27,6 @@ namespace API.Controllers
             List<Lesson> foundLessons = await lessonRepository.FindAllByConditionAsync(x => x.ModuleId == moduleId);
             List<LessonDto> lessonDtos = foundLessons.ConvertAll(x=>x.ToDto());
             return Ok(lessonDtos);
-        }
-
-         // 2. Получение полного списка содержания занятия
-        [HttpGet("lessons/{lessonId:long}/full")]
-        public async Task<IActionResult> FindByLessonId(long lessonId)
-        {  
-            // задания и ответы к ним, нужно работать с типами заданий
-            List<Models.Entities.Task> tasks = await taskRepository.FindAllByConditionAsync(x=>x.LessonId == lessonId);
-            tasks.ForEach(x=>
-            {
-                switch (x.TaskTypeId)
-                {
-                    case 1: // текстовое задание с проверкой, то есть есть 1 answer
-                    
-                    break;
-                }
-            });
-            // содержательные блоки
-            // сортировка данных по порядку
-            return Ok();
         }
     }
 }

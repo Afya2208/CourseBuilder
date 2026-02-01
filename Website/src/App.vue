@@ -2,107 +2,89 @@
 import { RouterLink, RouterView } from 'vue-router'
 import { useUserStore } from './stores/user'
 import { tryGetUser } from './util/userMethods'
-import { onMounted } from 'vue'
+import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import api from './services/api'
+import { BApp } from 'bootstrap-vue-next'
 
 // хранилище данных пользователя
 const { user, fullName } = storeToRefs(useUserStore())
 // при каждой загрузке App, то есть всего сайта
 onMounted(async () => {
-  // пробуем загрузить данные пользователя из хранилища браузера
-  await tryGetUser().then((response) => {
-    useUserStore().saveUser(response)
-    api.defaults.headers.common.Authorization = `Bearer ${sessionStorage.getItem('token')}`
-  })
+    // пробуем загрузить данные пользователя из хранилища браузера
+    await tryGetUser().then((response) => {
+        useUserStore().saveUser(response)
+        api.defaults.headers.common.Authorization = `Bearer ${sessionStorage.getItem('token')}`
+    })
+        .catch(err => {
+        console.error(err)
+    })
 })
+const logout = () => {
+    if (confirm("Вы точно хотите выйти из профиля?")) {
+        api.defaults.headers.common.Authorization = undefined
+        sessionStorage.removeItem("userId")
+        sessionStorage.removeItem("token")
+        useUserStore().signOut()
+    }
+}
 </script>
 
 <template>
-  <header>
-    <div class="px-3 py-2 bg-dark text-white">
-      <div class="container">
-        <div
-          class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start"
-        >
-          <a
-            href="/"
-            class="d-flex align-items-center my-2 my-lg-0 me-lg-auto text-white text-decoration-none"
-          >
-            CourseBuilder
-          </a>
-          <!--
-          
-          <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
-            <li>
-              <a href="#" class="nav-link text-secondary">
-                IMAGE
-                Home
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link text-white">
-                IMAGE
-                Dashboard
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link text-white">
-                IMAGE
-                Orders
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link text-white">
-                <img class="d-block mx-auto mb-1" src="/src/assets/logo.svg" width="24" height="24"></img>
-                Products
-              </a>
-            </li>
-            <li>
-              <a href="#" class="nav-link text-white">
-                IMAGE
-                Customers
-              </a>
-            </li>
-          </ul>
-          -->
+    <header>
+        <div class="px-3 py-2 bg-dark text-white">
+            <div class="container">
+                <div class="d-flex flex-wrap align-items-center 
+                justify-content-center justify-content-lg-start">
+                    <a href="/" class="d-flex align-items-center my-2 
+                    my-lg-0 me-lg-auto text-white text-decoration-none">
+                        CourseBuilder
+                    </a>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-
-    <nav class="px-3 py-2 bg-light border-bottom">
-      <div class="container d-flex flex-wrap">
-        <ul class="nav me-auto">
-          <li class="nav-item">
-            <RouterLink class="nav-link link-dark pr-2" to="/">Курсы</RouterLink>
-          </li>
-          <li class="nav-item">
-            <RouterLink class="nav-link link-dark px-2" to="/admin">Администрирование</RouterLink>
-          </li>
-          <li class="nav-item">
-            <a href="#" class="nav-link link-dark px-2 active" aria-current="page">Главная</a>
-          </li>
-        </ul>
-        <ul class="nav">
-          <li class="nav-item">
-            <RouterLink class="nav-link link-dark px-2" to="/auth">Авторизация</RouterLink>
-          </li>
-        </ul>
-      </div>
-    </nav>
-
-    ---------------------------
-    <div>
-      <nav>
-        <RouterLink to="/">Курсы</RouterLink>
-        <RouterLink to="/auth">Авторизация</RouterLink>
-      </nav>
-    </div>
-    <div>Пользователь: {{ fullName }}</div>
-  </header>
-  <main>
-    <RouterView />
-  </main>
+        <nav class="px-3 py-2 bg-light border-bottom">
+            <div class="container d-flex flex-wrap align-items-center">
+                    <div class="col ">
+                        <ul class="nav nav-underline">
+                            <li class="nav-item">
+                                <RouterLink class="nav-link link-dark pr-2"
+                                active-class="active" to="/">Главная</RouterLink>
+                            </li>
+                            <li class="nav-item">
+                                <RouterLink class="nav-link link-dark pr-2"
+                                active-class="active"
+                                 to="/courses">Курсы</RouterLink>
+                            </li>
+                            <li class="nav-item" v-if="user && user.role.id == 2">
+                                <RouterLink class="nav-link link-dark px-2" to="/admin">Администрирование</RouterLink>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="col ">
+                        <ul class="nav justify-content-end">
+                            <li v-if="!user" class="nav-item">
+                                <RouterLink class="nav-link link-dark px-2" to="/auth">Авторизация</RouterLink>
+                            </li>
+                            <button v-else class="btn btn-secondary px-2" @click="logout" >Выйти из профиля</button>
+                            <p v-if="user" class="link-dark px-2 m-0">
+                                {{ fullName }}
+                                <br>
+                                <span v-if="user.userInformation.position">{{ user.userInformation.position }} - </span>
+                                <span>{{ user.role.name }}</span>
+                            </p>
+                        </ul>
+                    </div>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <BApp>
+            <RouterView />
+        </BApp>
+    </main>
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>

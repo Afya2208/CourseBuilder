@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Exceptions;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Service
 {
@@ -28,6 +29,10 @@ namespace API.Service
                     break;
                 case NullReferenceException:
                     title = exception.Message;
+                    statusCode = StatusCodes.Status400BadRequest;
+                    break;
+                    case DbUpdateException:
+                    title = "Ошибка в базе данных: нельзя удалить используемые данные";
                     statusCode = StatusCodes.Status400BadRequest;
                     break;
             }

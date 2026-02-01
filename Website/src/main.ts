@@ -3,6 +3,7 @@ import { createPinia } from 'pinia'
 
 import App from './App.vue'
 import '@/assets/main.css'
+import 'bootstrap-vue-next'
 import router from './router'
 
 const app = createApp(App)
