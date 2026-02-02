@@ -109,6 +109,10 @@ export interface Role {
     id: number
     name: string
 }
+export interface LessonType {
+    id: number
+    name: string
+}
 export interface UserInformation {
     userId: number
     lastName?: string

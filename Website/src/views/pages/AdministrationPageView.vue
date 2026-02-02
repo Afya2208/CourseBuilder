@@ -3,7 +3,8 @@ import type { Role, User, UserEditable } from '@/models/main'
 import api from '@/services/api';
 import { useUserStore } from '@/stores/user';
 import { BButton, BCard, BCardText, BCardTitle, BForm, BFormFloatingLabel,
-    BInput, BCardBody, BFormSelect
+    BInput, BCardBody, BFormSelect,
+    BTable, BTbody
  } from 'bootstrap-vue-next';
 import { storeToRefs } from 'pinia';
 import { computed, onMounted, onUpdated, ref, watch } from 'vue'
@@ -59,62 +60,120 @@ const save = async () => {
 }
 </script>
 <template>
-    <div class="container">
+    <div style="padding: 10px;">
         <p>{{ user?.email }}</p>
         <h2>
             Пользователи
             <BButton variant="primary" @click="addUser">Добавить пользователя</BButton>
         </h2>
         <div class="d-flex flex-wrap">
-            <BCard v-for="user, index in users" class="m-1">
-                <BCardText>
-                    <BForm>
-                        
+            
+            <div class="table-responsive">
+                <table class="table table-striped table-hover table-bordered">
+                <thead>
+                    <tr>
+                    <th>Email</th>
+                    <th>Роль</th>
+                    <th>Фамилия</th>
+                    <th>Имя</th>
+                    <th>Отчество</th>
+                    <th>Телефон</th>
+                    <th>Должность</th>
+                    <th>Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(user, index) in users" :key="user.id">
+                    <td>
+                        <BInput 
+                        :disabled="!user.canRedact" 
+                        v-model="user.email"
+                        size="sm"
+                        />
+                    </td>
+                    <td>
+                        <BFormSelect 
+                        v-model="user.roleId" 
+                        :options="roles"
+                        :disabled="!user.canRedact" 
+                        size="sm"
+                        value-field="id" 
+                        text-field="name"
+                        />
+                    </td>
+                    <td>
+                        <BInput 
+                        :disabled="!user.canRedact" 
+                        v-model="user.userInformation.lastName"
+                        size="sm"
+                        />
+                    </td>
+                    <td>
+                        <BInput 
+                        :disabled="!user.canRedact" 
+                        v-model="user.userInformation.firstName"
+                        size="sm"
+                        />
+                    </td>
+                    <td>
+                        <BInput 
+                        :disabled="!user.canRedact" 
+                        v-model="user.userInformation.middleName"
+                        size="sm"
+                        />
+                    </td>
+                    <td>
+                        <BInput 
+                        :disabled="!user.canRedact" 
+                        v-model="user.userInformation.phone"
+                        size="sm"
+                        />
+                    </td>
+                    <td>
+                        <BInput 
+                        :disabled="!user.canRedact" 
+                        v-model="user.userInformation.position"
+                        size="sm"
+                        />
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            
+                        <BButton v-if="user.id == 0"
+                            size="sm" 
+                            @click="setPassword()"
+                            variant="outline-secondary"
+                        >
+                            Установить пароль
+                        </BButton>
 
-                        <BFormFloatingLabel class="my-1"
-                            label-for="user-email"
-                            label="Email">
-                            <BInput :disabled="!user.canRedact" v-model="user.email" id="user-email"/>
-                        </BFormFloatingLabel>
-                        
-                        <BFormSelect v-model="user.roleId" :options="roles"
-                        :disabled="!user.canRedact"
-                         value-field="id" text-field="name">
-                        </BFormSelect>
-
-                        <div v-if="user.userInformation">
-                            <BFormFloatingLabel class="my-1"
-                                label-for="user-lastName"
-                                label="Фамилия">
-                                <BInput :disabled="!user.canRedact" v-model="user.userInformation.lastName" id="user-lastName"/>
-                            </BFormFloatingLabel>
-                            <BFormFloatingLabel  class="my-1"
-                                label-for="user-firstName"
-                                label="Имя">
-                                <BInput :disabled="!user.canRedact" v-model="user.userInformation.firstName" id="user-firstName"/>
-                            </BFormFloatingLabel>
-                            <BFormFloatingLabel class="my-1"
-                                label-for="user-middleName"
-                                label="Отчество">
-                                <BInput :disabled="!user.canRedact" v-model="user.userInformation.middleName" id="user-middleName"/>
-                            </BFormFloatingLabel>
-                            <BFormFloatingLabel class="my-1"
-                                label-for="user-phone"
-                                label="Телефон">
-                                <BInput :disabled="!user.canRedact" v-model="user.userInformation.phone" id="user-phone"/>
-                            </BFormFloatingLabel>
-                            <BFormFloatingLabel class="my-1"
-                                label-for="user-phone"
-                                label="Должность">
-                                <BInput :disabled="!user.canRedact" v-model="user.userInformation.position" id="user-position"/>
-                            </BFormFloatingLabel>
-                            <BButton class="m-1 d-block" @click="changePassword">Сменить пароль</BButton>
-                            <BButton class="m-1 d-block" @click="redactUser(user)">Редактировать</BButton>
-                            <BButton class="m-1 d-block" @click="deleteUser(user, index)">Удалить</BButton>
+                        <BButton v-else
+                            size="sm" 
+                            @click="changePassword()"
+                            variant="outline-secondary"
+                        >
+                            Сменить пароль
+                        </BButton>
+                        <BButton 
+                            size="sm" 
+                            @click="redactUser(user)"
+                            variant="outline-warning"
+                        >
+                            ✏️
+                        </BButton>
+                        <BButton 
+                            size="sm" 
+                            @click="deleteUser(user, index)"
+                            variant="outline-danger"
+                        >
+                            ❌
+                        </BButton>
                         </div>
-                    </BForm>
-                </BCardText>
-            </BCard>
+                    </td>
+                    </tr>
+                </tbody>
+                </table>
+            </div>
         </div>
         <BButton variant="primary" @click="save">Сохранить изменения</BButton>
     </div>

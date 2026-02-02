@@ -45,7 +45,7 @@ const close = () => {
     }
 }
 const editableCourse = ref<CourseEditable>(getNullCourse())
-const saveCourse = async () => {
+const saveCourse = async (oldCourse:Course) => {
     if (editableCourse.value.id == 0) {
         await api.post<Course>("courses", editableCourse.value)
         .then(res => {
@@ -56,19 +56,23 @@ const saveCourse = async () => {
         })
         .catch(err => {
             hideCourseModal()
-            alert("Ошибка, повторорите позже")
+            alert("Ошибка, повторите позже")
         }) 
     }
     else {
         await api.put<Course>("courses", editableCourse.value)
-        .then(res => {
+            .then(res => {
+            let oldData = {...oldCourse}
+            oldCourse = res.data
+            oldCourse.lessonsCount = oldData.lessonsCount
+            oldCourse.modulesCount = oldData.modulesCount
             editableCourse.value = getNullCourse()
             hideCourseModal()
             alert("Курс успешно изменен")
         })
         .catch(err => {
             hideCourseModal()
-            alert("Ошибка, повторорите позже")
+            alert("Ошибка, повторите позже")
         }) 
     }
 }
@@ -83,7 +87,7 @@ const updateCourse = async (course: Course) => {
         minimalCompletionPercentage: course.minimalCompletionPercentage ?? 100,
         modulesHaveOrder: course.modulesHaveOrder ?? true
     }
-    course.themes?.forEach(x=> editableCourse.value.themesIds.push(x.id))
+    course.themes?.forEach(x => editableCourse.value.themesIds.push(x.id))
     showCourseModal()
 }
 </script>
@@ -162,7 +166,7 @@ const updateCourse = async (course: Course) => {
             
         </BForm>
         <template #footer>
-            <BButton variant="primary" @click="saveCourse()">Сохранить</BButton>
+            <BButton variant="primary" @click="saveCourse(editableCourse)">Сохранить</BButton>
             <BButton variant="dark" @click="hideCourseModal()">Отмена</BButton>
         </template>
     </BModal>

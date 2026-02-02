@@ -130,5 +130,19 @@ namespace Models.Dto
             };
             return entity;
         }
+
+        public static Lesson ToEntity(this LessonDto dto)
+        {
+            var entity = new Lesson()
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                Description = dto.Description,
+                ModuleId = dto.ModuleId,
+                LessonTypeId = dto.LessonTypeId,
+                Order = dto.Order
+            };
+            return entity;
+        }
     }
 }

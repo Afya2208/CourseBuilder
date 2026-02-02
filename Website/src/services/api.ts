@@ -27,11 +27,13 @@ api.interceptors.response.use(
             let userStore = useUserStore()
             let problemDetails = error.response.data as ProblemDetails
             console.error(JSON.stringify(problemDetails))
+            /*
             if (userStore.user && problemDetails.status == 401) {
                 alert("Закончилась сессия авторизации. Войдите в профиль снова")
                 userStore.logOut()
                 router.push("/auth")
             }
+            */
         }
         return Promise.reject(error) // дальнейшая передача error до места запроса
     },

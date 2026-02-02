@@ -9,5 +9,5 @@ public class UserDto
     public RoleDto Role { get; set; } = null!;
     public int RoleId { get; set; }
 
-    public UserInformationDto? UserInformation { get; set; }
+    public UserInformationDto UserInformation { get; set; }
 }

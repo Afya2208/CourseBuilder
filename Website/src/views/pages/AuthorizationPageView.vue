@@ -22,6 +22,11 @@ const authClick = async () => {
             router.push({ path: '/' })
         })  
     })
+        .catch(err => {
+            if (err.status == 401) {
+                alert("Неправильный пароль или почта")
+            }
+        })
 }
 </script>
 

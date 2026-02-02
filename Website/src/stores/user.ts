@@ -14,7 +14,7 @@ export const useUserStore = defineStore('user-info',
         fullName: (state) => {
             if (state.user) {
                 let info = state.user.userInformation
-                return `${info.lastName} ${info.firstName} ${info.middleName}`
+                return `${info?.lastName} ${info?.firstName} ${info?.middleName}`
             }
             return "Не авторизован"        
         } 

@@ -14,7 +14,7 @@ const { user, fullName } = storeToRefs(useUserStore())
 onMounted(async () => {
     // пробуем загрузить данные пользователя из хранилища браузера
     await useUserStore().init().then(res => {
-        
+        console.log("asas")
     })
 })
 const logout = () => {
