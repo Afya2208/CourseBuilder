@@ -18,8 +18,9 @@ const authClick = async () => {
         api.defaults.headers.common = { Authorization: `Bearer ${signInResponse.token}` }
         sessionStorage.setItem('token', signInResponse.token)
         sessionStorage.setItem('userId', signInResponse.user.id.toString())
-        useUserStore().signIn(signInResponse)
-        router.push({ path: '/' })
+        useUserStore().updateUserData().then(() => {
+            router.push({ path: '/' })
+        })  
     })
 }
 </script>

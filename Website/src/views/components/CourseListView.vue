@@ -19,9 +19,9 @@ const props = defineProps<{
 const themes = ref(props.themes ?? [])
 const courses = ref(props.courses ?? [])
 
-const deleteCourse = async (courseId: number) => {
+const deleteCourse = async (courseId: number, index: number) => {
 	await api.delete(`courses/${courseId}`).then(res=> {
-        
+        courses.value.splice(index, 1)
 	})
 }
 const { hide:hideCourseModal, show:showCourseModal } = useToggle('add-course-modal')
@@ -32,7 +32,7 @@ const getNullCourse = () : CourseEditable => {
         id: 0,
         name: '',
         description: '',
-        authorId: user.value!!.id,
+        authorId: user.value?.id ?? 0,
         themesIds: [],
         minimalCompletionPercentage: 100,
         modulesHaveOrder: true
@@ -62,7 +62,6 @@ const saveCourse = async () => {
     else {
         await api.put<Course>("courses", editableCourse.value)
         .then(res => {
-            courses.value.push({...res.data, lessonsCount: 0, modulesCount: 0,})
             editableCourse.value = getNullCourse()
             hideCourseModal()
             alert("Курс успешно изменен")
@@ -77,8 +76,9 @@ const updateCourse = async (course: Course) => {
     editableCourse.value = {
         id: course.id,
         name: course.name,
+        price: course.price,
         description: course.description,
-        authorId: course.authorId ?? user.value!!.id,
+        authorId: course.authorId ?? user.value?.id ?? 0,
         themesIds: [],
         minimalCompletionPercentage: course.minimalCompletionPercentage ?? 100,
         modulesHaveOrder: course.modulesHaveOrder ?? true
@@ -99,7 +99,7 @@ const updateCourse = async (course: Course) => {
         </label>
     </form>
     <div>
-        <BButton class="my-2" variant="primary" @click="addCourse">Добавить новый курс</BButton>
+        <BButton class="my-2" v-if="user?.role.id == 1" variant="primary" @click="addCourse">Добавить новый курс</BButton>
     </div>
 
     <BModal id="add-course-modal" centered 
@@ -168,12 +168,14 @@ const updateCourse = async (course: Course) => {
     </BModal>
 
     <div class="d-flex">
-        <div v-for="course in courses" class="card m-2">
+        <div v-for="course, index in courses" class="card m-2">
             <div class="card-body" style="max-width: 18rem;">
                 <h5 class="card-title">
                     {{ course.name }}
-                    <BButton variant="danger" @click="deleteCourse(course.id)">❌</BButton>
-                    <BButton variant="warning" @click="updateCourse(course)">✏️</BButton>
+                    <span v-if="user?.role.id == 1">
+                        <BButton variant="danger" @click="deleteCourse(course.id, index)">❌</BButton>
+                        <BButton variant="warning" @click="updateCourse(course)">✏️</BButton>
+                    </span>
                 </h5>
                 <p class="card-text">{{ course.description }}</p>
                 <p class="card-text">
@@ -186,7 +188,7 @@ const updateCourse = async (course: Course) => {
                 <h6 class="card-subtitle my-2 text-muted ">Темы курса:</h6>
                 <ul>
                     <li v-for="theme in course.themes">
-                        <p>{{ theme.name }}</p>
+                        <p>{{ themes.find(x=>x.id == theme.id)?.name }}</p>
                     </li>
 				</ul>
             </div>

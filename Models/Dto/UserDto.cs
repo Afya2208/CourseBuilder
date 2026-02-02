@@ -7,6 +7,7 @@ public class UserDto
     public string Email { get; set; } = null!;
 
     public RoleDto Role { get; set; } = null!;
+    public int RoleId { get; set; }
 
     public UserInformationDto? UserInformation { get; set; }
 }

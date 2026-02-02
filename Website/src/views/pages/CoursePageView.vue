@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Course, Module } from '@/models/main'
 import api from '@/services/api'
+import { BCard, BCardText } from 'bootstrap-vue-next'
 import { onMounted, ref, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
 
@@ -22,48 +23,35 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="course-main-info-div" v-if="course">
-        <h1>{{ course.name }}</h1>
-        <label>
-            <span>Название:</span>
-            <input v-model="course.name" />
-        </label>
-        <label>
-            <span>Стоимость:</span>
-            <input v-model="course.price" type="number" />
-        </label>
-        <label>
-            <span>Описание:</span>
-            <input v-model="course.description" />
-        </label>
-    </div>
-    <div v-if="course" class="course-themes-div">
+    <div class="container">
+        <div v-if="course">
+            <h1>{{ course.name }}</h1>
+            <p v-if="course.description">{{ course.description }}</p>
+            <p v-if="course.price && course.price > 0">{{ course.price }} руб.</p>
+        </div>
         <h3>Темы</h3>
-        <span>+</span>
-        <ul>
-            <li v-for="theme in course.themes">
-                <p>{{ theme.name }}</p>
-            </li>
-        </ul>
-    </div>
-    <div class="course-modules-div" v-if="modules">
+        <div v-if="course" class="d-flex flex-wrap">
+            <ul>
+                <li v-for="theme in course.themes">
+                    <p>{{ theme.name }}</p>
+                </li>
+            </ul>
+        </div>
         <h3>Модули</h3>
-        <div class="block-list-hor">
-            <div v-for="module in modules" :style="{ order: module.order }">
-                <p>
-                    <RouterLink :to="`/courses/modules/${module.id}`">{{ module.name }}</RouterLink>
-                    <span class="li-block-title"></span>
-                    <br />
-                    {{ module.description }}
-                    <br />
-                    Количество занятий: {{ module.lessonsCount }}
-                </p>
-            </div>
+        <div class="d-flex flex-wrap" v-if="modules" >
+            <BCard :title="module.name" class="m-2" style="max-width: 20rem;"
+            v-for="module in modules" :style="{ order: module.order }">
+                <BCardText>    
+                    <p>{{ module.description }}</p>
+                    <p>Количество занятий: {{ module.lessonsCount }}</p>
+                    <p><RouterLink :to="`/courses/modules/${module.id}`">Перейти к занятиям</RouterLink></p>
+                </BCardText>
+            </BCard>
         </div>
     </div>
-    <div>
-        <button @click="saveChanges">Сохранить</button>
-    </div>
+    
 </template>
 
-<style scoped></style>
+<style scoped>
+
+</style>

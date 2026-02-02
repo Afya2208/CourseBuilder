@@ -21,7 +21,6 @@ namespace API.Controllers
         }
 
         [HttpGet("content-block-types")]
-        [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> FindAllTypes()
         {
             var contentBlocks = await contentBlockTypeRepository.FindAllAsync();

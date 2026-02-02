@@ -6,26 +6,22 @@ import { onMounted, ref } from 'vue'
 import { storeToRefs } from 'pinia'
 import api from './services/api'
 import { BApp } from 'bootstrap-vue-next'
+import router from './router'
 
 // хранилище данных пользователя
 const { user, fullName } = storeToRefs(useUserStore())
 // при каждой загрузке App, то есть всего сайта
 onMounted(async () => {
     // пробуем загрузить данные пользователя из хранилища браузера
-    await tryGetUser().then((response) => {
-        useUserStore().saveUser(response)
-        api.defaults.headers.common.Authorization = `Bearer ${sessionStorage.getItem('token')}`
-    })
-        .catch(err => {
-        console.error(err)
+    await useUserStore().init().then(res => {
+        
     })
 })
 const logout = () => {
     if (confirm("Вы точно хотите выйти из профиля?")) {
         api.defaults.headers.common.Authorization = undefined
-        sessionStorage.removeItem("userId")
-        sessionStorage.removeItem("token")
-        useUserStore().signOut()
+        useUserStore().logOut()
+        router.push('/')
     }
 }
 </script>

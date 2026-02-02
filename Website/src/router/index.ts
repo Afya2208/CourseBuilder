@@ -1,3 +1,4 @@
+import { useUserStore } from '@/stores/user'
 import { createRouter, createWebHistory } from 'vue-router'
 
 const router = createRouter({
@@ -12,6 +13,16 @@ const router = createRouter({
             path: '/',
             name: 'main',
             component: () => import('../views/pages/MainPage.vue'),
+            
+        },
+        {
+            path: '/admin',
+            name: 'administration',
+            component: () => import('../views/pages/AdministrationPageView.vue'),
+            meta: {
+                requireAuth: true,
+                requireAdmin: true
+            }
         },
         {
             path: '/courses',
@@ -34,6 +45,21 @@ const router = createRouter({
             component: () => import('../views/pages/LessonView.vue'),
         },
     ],
+})
+router.beforeEach(async (to, from) => {
+    let userStore = useUserStore()
+    if (to.meta.requireAuth && !userStore.isInitialized) {
+        await userStore.init();
+    }
+    if (to.meta.requireAuth && !userStore.user) {
+        return '/auth';
+    }
+    if (to.meta.requireAdmin && userStore.user?.role?.id !== 2) {
+        return '/';
+    }
+    else {
+         
+    }
 })
 
 export default router

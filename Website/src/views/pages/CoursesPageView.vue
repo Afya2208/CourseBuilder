@@ -28,7 +28,7 @@ onMounted(async () => {
         <p v-if="!courses || !themes">Загрузка...</p>
         <div v-if="courses && themes">
             <CourseListView :courses="courses" :themes="themes"/>
-            <ThemeListView />
+            <ThemeListView :themes="themes"/>
         </div>
         <LessonEditorView />
     </div>

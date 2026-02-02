@@ -121,7 +121,15 @@ export interface User {
     id: number
     email: string
     role: Role
-    userInformation: UserInformation
+    userInformation: UserInformation,
+    canRedact?: boolean
+}
+export interface UserEditable {
+    id: number
+    email: string
+    roleId: number
+    userInformation: UserInformation,
+    canRedact?: boolean
 }
 
 export interface SignInResponse {

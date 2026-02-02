@@ -14,16 +14,28 @@ using Models.Entities;
 namespace API.Controllers
 {
     [ApiController]
-    [Authorize]
-    public class UserController(UserRepository userRepository, AuthService authService) : ControllerBase
+    public class UserController(UserRepository userRepository, AuthService authService,
+        RoleRepository roleRepository) : ControllerBase
     {
+
+        [HttpGet("roles")]
+        public async Task<IActionResult> FindAllRoles()
+        {
+            var roles = await roleRepository.FindAllAsync();
+            var rolesDto = roles.ConvertAll(x=> x.ToDto());
+            return Ok(rolesDto);
+        }
+
         [HttpGet("users")]
-        [Authorize(Roles="Администратор")]
+        //[Authorize(Roles="Администратор")]
         public async Task<IActionResult> FindAll()
         {
-            return Ok(await userRepository.FindAllAsync());
+            var users = await userRepository.FindAllAsync([x => x.UserInformation]);
+            var usersDto = users.ConvertAll(x=> x.ToDto());
+            return Ok(usersDto);
         }
         [HttpGet("users/{userId:long}")]
+        [Authorize]
         public async Task<IActionResult> FindById(long userId)
         {
             User? userDb = await userRepository.FindByIdAsync(userId, [x => x.Role, x => x.UserInformation]);
@@ -38,7 +50,7 @@ namespace API.Controllers
         }
 
         [HttpPost("sign-up")]
-        [Authorize(Roles="Администратор")]
+        //[Authorize(Roles="Администратор")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
         {
             return Ok(await authService.SignUpAsync(request));

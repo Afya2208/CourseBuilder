@@ -5,8 +5,11 @@ import { useUserStore } from '@/stores/user'
 import { storeToRefs } from 'pinia'
 import { inject, ref, type Ref } from 'vue'
 
-const themes = ref(inject<Theme[]>('themes') ?? [])
 
+const props = defineProps<{
+    themes: Theme[]
+}>()
+const themes = ref(props.themes)
 const { user } = storeToRefs(useUserStore())
 
 const deleteTheme = async (themeId: number, index:number) => {

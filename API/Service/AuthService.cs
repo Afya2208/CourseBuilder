@@ -43,6 +43,7 @@ namespace API.Service
             {
                 Salt = salt,
                 Email = request.Email,
+                RoleId = request.RoleId,
                 Password = passwordHash,
             };
             var userInfo = new UserInformation()

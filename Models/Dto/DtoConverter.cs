@@ -14,7 +14,8 @@ namespace Models.Dto
             var dto = new UserDto()
             {
                 Id = entity.Id,
-                Email = entity.Email
+                Email = entity.Email,
+                RoleId = entity.RoleId
             };
             if (entity.Role != null)
             {
@@ -37,6 +38,15 @@ namespace Models.Dto
                     UserId = info.UserId
                 };
             }
+            return dto;
+        }
+        public static RoleDto ToDto(this Role entity)
+        {
+            var dto = new RoleDto()
+            {
+                Id = entity.Id,
+                Name = entity.Name  
+            };
             return dto;
         }
         public static LessonDto ToDto(this Lesson entity)

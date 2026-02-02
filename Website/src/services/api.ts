@@ -1,4 +1,6 @@
 import type { ProblemDetails } from '@/models/main'
+import router from '@/router'
+import { useUserStore } from '@/stores/user'
 import axios, { AxiosError, type AxiosResponse } from 'axios'
 import { useRouter } from 'vue-router'
 
@@ -21,11 +23,15 @@ api.interceptors.response.use(
         return response // дальнейшая передача ответа до места запроса
     },
     (error: AxiosError) => {
-        console.error('ойойойой...')
         if (error.response) {
+            let userStore = useUserStore()
             let problemDetails = error.response.data as ProblemDetails
             console.error(JSON.stringify(problemDetails))
-            alert(problemDetails.title)
+            if (userStore.user && problemDetails.status == 401) {
+                alert("Закончилась сессия авторизации. Войдите в профиль снова")
+                userStore.logOut()
+                router.push("/auth")
+            }
         }
         return Promise.reject(error) // дальнейшая передача error до места запроса
     },
@@ -33,19 +39,3 @@ api.interceptors.response.use(
 
 export default api
 
-function handleAPIError(error: AxiosError) {
-    if (error.status == 401) {
-        console.log('Сессия закончена, требуется повторная авторизация')
-        const router = useRouter()
-        router.push({ path: '/' })
-    }
-    let problemDetails: ProblemDetails = {
-        title: 'Ошибка',
-        status: 400,
-    }
-    if (error.response) {
-        console.log('Сессия закончена, sasaddsasadssadasdтребуется повторная авторизация')
-        problemDetails = error.response.data as ProblemDetails
-        alert(problemDetails.title)
-    }
-}

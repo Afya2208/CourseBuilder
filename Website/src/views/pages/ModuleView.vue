@@ -3,7 +3,7 @@ import type { Course, Module, Lesson } from '@/models/main'
 import api from '@/services/api'
 import { onMounted, ref, type Ref } from 'vue'
 import { useRoute } from 'vue-router'
-
+import { BCard, BCardText } from 'bootstrap-vue-next'
 const module = ref<Module>()
 const lessons = ref<Lesson[]>()
 const courseId = useRoute().params.courseId
@@ -23,35 +23,24 @@ onMounted(async () => {
 </script>
 
 <template>
-    <div class="course-main-info-div" v-if="module">
-        <h1>{{ module.name }}</h1>
-        <label>
-            <span>Название:</span>
-            <input v-model="module.name" />
-        </label>
-        <label>
-            <span>Описание:</span>
-            <input v-model="module.description" />
-        </label>
-        <RouterLink :to="`/courses/${module.courseId}`">Вернуться к списку модулей</RouterLink>
-    </div>
-    <div class="module-lessons-div" v-if="lessons">
-        <h3>Занятия</h3>
-        <div class="block-list-hor">
-            <div v-for="lesson in lessons"
-                :class="{ is_control: lesson.lessonTypeId == 2, is_study: lesson.lessonTypeId == 1 }"
-                :style="{ order: lesson.order }">
-                <p>
-                    <RouterLink :to="`/courses/modules/lessons/${lesson.id}`">{{ lesson.name }}</RouterLink>
-                </p>
-                <p>
-                    {{ lesson.description }}
-                </p>
-            </div>
+    <div class="container">
+        <div v-if="module">
+            <h1>{{ module.name }}</h1>
+            <p v-if="module.description">{{ module.description }}</p>
+            <p v-if="module.lessonsCount">{{ module.lessonsCount }} занятий</p>
+            <RouterLink :to="`/courses/${module.courseId}`">Вернуться к списку модулей</RouterLink>
         </div>
-    </div>
-    <div>
-        <button @click="saveChanges">Сохранить</button>
+        <h3>Занятия</h3>
+        <div class="d-flex flex-wrap" v-if="lessons" >
+            <BCard :title="lesson.name" class="m-2" style="max-width: 20rem;"
+            :class="{ is_control: lesson.lessonTypeId == 2, is_study: lesson.lessonTypeId == 1 }"
+            v-for="lesson in lessons" :style="{ order: lesson.order }">
+                <BCardText>    
+                    <p>{{ lesson.description }}</p>
+                    <p><RouterLink :to="`/courses/modules/lessons/${lesson.id}`">Перейти к занятию</RouterLink></p>
+                </BCardText>
+            </BCard>
+        </div>
     </div>
 </template>
 
