@@ -32,9 +32,24 @@ namespace API.Controllers
         [HttpGet("{courseId:int}")]
         public async Task<IActionResult> FindById(int courseId)
         {
-            Course? course = await courseRepository.FindByIdAsync(courseId, [x=>x.Themes]);
+            Course? course = await courseRepository.FindByIdAsync(courseId, [x => x.Themes]);
             if (course == null) throw new NotFoundException($"Не найден курс id={courseId}");
             return Ok(course.ToDto());
+        }
+        [HttpGet("search")]
+        public async Task<IActionResult> FindAllByTextAndThemeId(string? text, int? themeId)
+        {
+            var textIsNull = string.IsNullOrWhiteSpace(text);
+            var themeIdIsNull = !themeId.HasValue;
+            List<Course> courses = await courseRepository.FindAllByConditionAsync(x => (themeIdIsNull || x.Themes.Any(t => t.Id == themeId)) 
+            && (textIsNull || x.Name.Contains(text) || x.Description == null || x.Description.Contains(text)) , [x=>x.Themes]);
+            List<CourseDto> courseDtos = courses.ConvertAll(x=>x.ToDto());
+            courseDtos.ForEach(async x=>
+            {
+                x.LessonsCount = await lessonRepository.GetLessonsCountForCourse(x.Id);
+                x.ModulesCount = await moduleRepository.GetModulesCountForCourse(x.Id);
+            });
+            return Ok(courseDtos);
         }
         [HttpPost]
         [Authorize(Roles="Разработчик")]
@@ -52,7 +67,7 @@ namespace API.Controllers
         [Authorize(Roles="Разработчик")]
         public async Task<IActionResult> Delete(int courseId)
         {
-             return Ok(await courseRepository.DeleteAsync(courseId));
+            return Ok(await courseRepository.DeleteAsync(courseId));
         }
     }
 }

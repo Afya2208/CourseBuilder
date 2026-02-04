@@ -10,26 +10,25 @@ const courses = ref<Course[]>()
 const themes = ref<Theme[]>()
 provide('themes', themes)
 const getData = async () => {
-    await api.get<Theme[]>('themes').then((res) => {
-        themes.value = res.data
-    })
-    await api.get<Course[]>('courses').then((res) => {
-        courses.value = res.data
-    })
+	await api.get<Theme[]>('themes').then((res) => {
+		themes.value = res.data
+	})
+	await api.get<Course[]>('courses').then((res) => {
+		courses.value = res.data
+	})
 }
 onMounted(async () => {
-    await getData()
+	await getData()
 })
 </script>
 
 <template>
-    <div class="container">
-        <h1>Курсы</h1>
-        <p v-if="!courses || !themes">Загрузка...</p>
-        <div v-if="courses && themes">
-            <CourseListView :courses="courses" :themes="themes"/>
-            <ThemeListView :themes="themes"/>
-        </div>
-        <LessonEditorView />
-    </div>
+	<div class="container">
+		<h1>Курсы</h1>
+		<p v-if="!courses || !themes">Загрузка...</p>
+		<div v-if="courses && themes">
+			<CourseListView :courses="courses" :themes="themes" />
+			<ThemeListView :themes="themes" />
+		</div>
+	</div>
 </template>

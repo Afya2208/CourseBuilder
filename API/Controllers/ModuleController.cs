@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Exceptions;
 using API.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Models.Dto;
 using Models.Entities;
@@ -27,6 +28,26 @@ namespace API.Controllers
         {
             Module? module = await moduleRepository.FindByIdAsync(moduleId);
             if (module == null) throw new NotFoundException($"Не найден модуль id={module}");
+            return Ok(module.ToDto());
+        }
+        [HttpPost("modules")]
+        [Authorize(Roles="Разработчик")]
+        public async Task<IActionResult> Add([FromBody] ModuleDto moduleToAdd)
+        {
+            return Ok((await moduleRepository.AddAsync(moduleToAdd.ToEntity())).ToDto());
+        }
+        [HttpPut("modules")]
+        [Authorize(Roles="Разработчик")]
+        public async Task<IActionResult> Update([FromBody] ModuleDto moduleToUpdate)
+        {
+            return Ok((await moduleRepository.UpdateAsync(moduleToUpdate.ToEntity())).ToDto());
+        }
+        [HttpDelete("modules/{moduleId:long}")]
+        [Authorize(Roles="Разработчик")]
+        public async Task<IActionResult> Delete(long moduleId)
+        {
+            var module = await moduleRepository.DeleteAsync(moduleId);
+            if (module == null) return NoContent();
             return Ok(module.ToDto());
         }
     }

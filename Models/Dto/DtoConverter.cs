@@ -22,7 +22,7 @@ namespace Models.Dto
                 dto.Role = new RoleDto()
                 {
                     Id = entity.RoleId,
-                    Name = entity.Role.Name  
+                    Name = entity.Role.Name
                 };
             }
             if (entity.UserInformation != null)
@@ -40,6 +40,31 @@ namespace Models.Dto
             }
             return dto;
         }
+        
+        public static User ToEntity(this UserDto dto)
+        {
+            var entity = new User()
+            {
+                Id = dto.Id,
+                Email = dto.Email,
+                RoleId = dto.RoleId
+            };
+            if (entity.UserInformation != null)
+            {
+                var info = dto.UserInformation;
+                entity.UserInformation = new UserInformation()
+                {
+                    FirstName = info.FirstName,
+                    LastName = info.LastName,
+                    Phone = info.Phone,
+                    Position = info.Position,
+                    MiddleName = info.MiddleName,
+                    UserId = info.UserId
+                };
+            }
+            return entity;
+        }
+
         public static RoleDto ToDto(this Role entity)
         {
             var dto = new RoleDto()
@@ -83,6 +108,19 @@ namespace Models.Dto
             };
             return dto;
         }
+        public static Module ToEntity(this ModuleDto dto)
+        {
+            var entity = new Module()
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                CourseId = dto.CourseId,
+                Description = dto.Description,
+                Order = dto.Order,
+                LessonsHaveOrder = dto.LessonsHaveOrder
+            };
+            return entity;
+        }
         public static ModuleDto ToDto(this Module entity)
         {
             var dto = new ModuleDto()
@@ -92,7 +130,8 @@ namespace Models.Dto
                 CourseId = entity.CourseId,
                 Description = entity.Description,
                 Order = entity.Order,
-                LessonsCount = entity.Lessons?.Count
+                LessonsCount = entity.Lessons?.Count,
+                LessonsHaveOrder = entity.LessonsHaveOrder
             };
             return dto;
         }

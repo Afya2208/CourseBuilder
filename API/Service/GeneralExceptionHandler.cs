@@ -23,6 +23,10 @@ namespace API.Service
                     title = exception.Message;
                     statusCode = StatusCodes.Status401Unauthorized;
                     break;
+                case ArgumentException:
+                    title = exception.Message;
+                    statusCode = StatusCodes.Status400BadRequest;
+                    break;
                 case NotFoundException:
                     title = exception.Message;
                     statusCode = StatusCodes.Status404NotFound;

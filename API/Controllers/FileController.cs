@@ -30,4 +30,7 @@ public class FileController(CoursesDbContext context) : ControllerBase
         if (file == null || file.File == null) throw new NotFoundException($"Файл не найден");
         return File(file.File, "application/octet-stream", file.FileName);
     }
+
+    
+
 }

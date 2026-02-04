@@ -19,6 +19,7 @@ namespace API.Controllers
     {
 
         [HttpGet("roles")]
+        [Authorize(Roles="Администратор")]
         public async Task<IActionResult> FindAllRoles()
         {
             var roles = await roleRepository.FindAllAsync();
@@ -27,10 +28,10 @@ namespace API.Controllers
         }
 
         [HttpGet("users")]
-        //[Authorize(Roles="Администратор")]
+        [Authorize(Roles="Администратор")]
         public async Task<IActionResult> FindAll()
         {
-            var users = await userRepository.FindAllAsync([x => x.UserInformation]);
+            var users = await userRepository.FindAllAsync([x => x.UserInformation, x=>x.Role]);
             var usersDto = users.ConvertAll(x=> x.ToDto());
             return Ok(usersDto);
         }
@@ -50,10 +51,24 @@ namespace API.Controllers
         }
 
         [HttpPost("sign-up")]
-        //[Authorize(Roles="Администратор")]
+        [Authorize(Roles = "Администратор")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
         {
-            return Ok(await authService.SignUpAsync(request));
+            var user = await authService.SignUpAsync(request);
+            user.Role = await roleRepository.FindByIdAsync(user.RoleId);
+            return Ok(user.ToDto());
+        }
+        [HttpDelete("users/{userId:long}")]
+        [Authorize(Roles="Администратор")]
+        public async Task<IActionResult> Update(long userId)
+        {
+            return Ok((await userRepository.DeleteAsync(userId)).ToDto());
+        }
+        [HttpPut("users")]
+        [Authorize(Roles="Администратор")]
+        public async Task<IActionResult> Update([FromBody] UserDto userToUpdate)
+        {
+            return Ok((await userRepository.UpdateAsync(userToUpdate.ToEntity())).ToDto());
         }
     }
 }

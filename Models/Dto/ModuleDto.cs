@@ -15,6 +15,7 @@ namespace Models.Dto
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string? Description { get; set; }
         public int CourseId { get; set; }
+        public bool LessonsHaveOrder { get; set; }
         public int Order { get; set; }
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]

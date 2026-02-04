@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Exceptions;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.EntityFrameworkCore;
 using Models.Dto;
 using Models.Entities;
@@ -34,6 +36,7 @@ namespace API.Repositories
         public async Task<Course> UpdateAsync(AddUpdateCourseRequest updateCourseRequest)
         {
             var oldDbCourse = await context.Courses.Include(x => x.Themes).FirstOrDefaultAsync(x => x.Id == updateCourseRequest.Id);
+            if (oldDbCourse == null) throw new NotFoundException("Не найден курс");
             oldDbCourse.Themes.Clear();
             oldDbCourse.Name = updateCourseRequest.Name;
             oldDbCourse.Description = updateCourseRequest.Description;

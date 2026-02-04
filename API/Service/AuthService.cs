@@ -31,7 +31,7 @@ namespace API.Service
                 User = userDto 
             };
         }
-        public async Task<bool> SignUpAsync(SignUpRequest request)
+        public async Task<User> SignUpAsync(SignUpRequest request)
         {
             // проверка на почту, если уже есть пользователь, то отклоняем запрос
             User? user = await userRepository.FindByConditionAsync(x=>x.Email == request.Email);
@@ -56,8 +56,8 @@ namespace API.Service
                 User = newUser,
             };
             newUser.UserInformation = userInfo;
-            await userRepository.AddAsync(newUser);
-            return true;
+            var userSaved = await userRepository.AddAsync(newUser);
+            return userSaved;
         }
     }
 }
