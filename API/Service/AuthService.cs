@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using API.Exceptions;
 using API.Interface;
 using API.Repositories;
 using API.Util;
@@ -17,19 +18,31 @@ namespace API.Service
     {
         public async Task<SignInResponse> SignInAsync(SignInRequest request)
         {
-            User? user = await userRepository.FindByConditionAsync(x=>x.Email == request.Email, [y=>y.Role, y=>y.UserInformation]);
+            User? user = await userRepository.FindByConditionAsync(x => x.Email == request.Email, [y => y.Role, y => y.UserInformation]);
             if (user == null) throw new AuthenticationException("Неправильный пароль или логин");
 
             var passwordHashFromRequest = Hashes.GetPbkdf2Hash(request.Password, user.Salt);
             if (!passwordHashFromRequest.SequenceEqual(user.Password)) throw new AuthenticationException("Неправильный пароль или логин");
 
-            var token =  JwtTokens.GenerateToken(configuration, user);
+            var token = JwtTokens.GenerateToken(configuration, user);
             var userDto = user.ToDto();
             return new SignInResponse()
             {
                 Token = token,
-                User = userDto 
+                User = userDto
             };
+        }
+        
+        public async System.Threading.Tasks.Task ChangePassword(ChangePasswordRequest request)
+        {
+            User? user = await userRepository.FindByIdAsync(request.UserId);
+            if (user == null) throw new NotFoundException("Не найден пользователь");
+
+            var newSalt = Hashes.GetNewSalt();
+            var passwordHashFromRequest = Hashes.GetPbkdf2Hash(request.Password, newSalt);
+            user.Salt = newSalt;
+            user.Password = passwordHashFromRequest;
+            await userRepository.UpdateAsync(user);
         }
         public async Task<User> SignUpAsync(SignUpRequest request)
         {

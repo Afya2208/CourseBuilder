@@ -2,7 +2,7 @@ export interface Course {
 	id: number
 	name: string
 	description?: string
-	price?: number
+	price: number
 	authorId?: number
 	themes?: Theme[]
 	themesIds?: number[]
@@ -15,7 +15,7 @@ export interface CourseEditable {
 	id: number
 	name: string
 	description?: string
-	price?: number
+	price: number
 	authorId: number
 	themesIds: number[]
 	modulesHaveOrder: boolean
@@ -32,10 +32,7 @@ export interface TaskType {
 	name: string
 }
 
-export interface CorrelationPart {
-	correlationId: number
-	value: string
-}
+
 export interface UserAnswer {
 	textValue?: string
 	file?: Uint8Array
@@ -54,6 +51,7 @@ export interface Lesson {
 	order: number
 }
 export interface Task {
+    lessonId:number
 	taskTypeId: number
 	order: number
 	id: number
@@ -77,7 +75,8 @@ export interface TaskAnswer {
 export interface Correlation {
 	left: string
 	right: string
-	id: number
+    id: number
+    rightId: number
 }
 export interface ContentBlockType {
 	id: number
@@ -89,9 +88,7 @@ export interface ContentBlock {
 	id: number
 	textValue?: string
 	fileName?: string
-	fileUrl?: string
-	fileData?: string
-	fileMimeType?: string
+    fileData?: string,
 	file?: File
 	_toDelete?: boolean
 	name: string

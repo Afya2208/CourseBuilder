@@ -49,7 +49,7 @@ namespace Models.Dto
                 Email = dto.Email,
                 RoleId = dto.RoleId
             };
-            if (entity.UserInformation != null)
+            if (dto.UserInformation != null)
             {
                 var info = dto.UserInformation;
                 entity.UserInformation = new UserInformation()
@@ -92,7 +92,29 @@ namespace Models.Dto
             var dto = new TaskTypeDto()
             {
                 Id = entity.Id,
-                Name = entity.Name  
+                Name = entity.Name
+            };
+            return dto;
+        }
+        public static TaskAnswerDto ToDto(this TaskAnswer entity)
+        {
+            var dto = new TaskAnswerDto()
+            {
+                Id = entity.Id,
+                TaskId = entity.TaskId,
+                IsRight = entity.IsRight,
+                TextValue = entity.TextValue
+            };
+            return dto;
+        }
+        public static CorrelationDto ToDto(this Models.Entities.Correlation entity)
+        {
+            var dto = new CorrelationDto()
+            {
+                TaskId = entity.TaskId,
+                Id = entity.Id,
+                Right = entity.Right,
+                Left = entity.Left,
             };
             return dto;
         }
@@ -100,11 +122,11 @@ namespace Models.Dto
         {
             var dto = new TaskDto()
             {
-                TaskType = entity.TaskType?.ToDto(),
                 Id = entity.Id,
                 LessonId = entity.LessonId,
                 Question = entity.Question,
-
+                TaskTypeId = entity.TaskTypeId,
+                Order = entity.Order
             };
             return dto;
         }
@@ -118,6 +140,18 @@ namespace Models.Dto
                 Description = dto.Description,
                 Order = dto.Order,
                 LessonsHaveOrder = dto.LessonsHaveOrder
+            };
+            return entity;
+        }
+        public static TaskAnswer ToEntity(this TaskAnswerDto dto)
+        {
+            var entity = new TaskAnswer()
+            {
+                Id = dto.Id,
+                TextValue = dto.TextValue,
+                TaskId = dto.TaskId,
+                IsRight = dto.IsRight,
+                UserId = dto.UserId
             };
             return entity;
         }

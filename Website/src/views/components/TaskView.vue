@@ -1,12 +1,17 @@
 <script lang="ts" setup>
 import type { Correlation, Task, TaskAnswer, UserAnswer } from '@/models/main'
 import api from '@/services/api'
-import { indexToChar, mixCorrelations, randomInt } from '@/util/methods'
+import { useUserStore } from '@/stores/user';
+import { indexToChar, randomInt } from '@/util/methods'
 import { onMounted, ref } from 'vue'
 
 const props = defineProps<{
-	task: Task
+    task: Task,
+    isEditing: boolean,
+    index:number
 }>()
+const userStore = useUserStore()
+const user = ref (userStore.user)
 const theTask = ref(props.task)
 const answer = ref<TaskAnswer>()
 const answerOptions = ref<TaskAnswer[]>([])
@@ -19,10 +24,12 @@ const userAnswer = ref<UserAnswer>({
 	selectedTaskAnswersId: [],
 	selectedTaskAnswerId: 0,
 })
-const userCorrelations = ref<Correlation[]>([])
-const correlations = ref<Correlation[]>([])
+const userIndexCorrelations = ref<string[]>([])
+const correlationOptionsIndexes = ref<string[]>([])
+const originalCorrelations = ref<Correlation[]>([])
+const mixedCorrelations = ref<Correlation[]>([])
 onMounted(async () => {
-	await loadData()
+    await loadData()
 })
 const checkTask = async () => {
 	switch (theTask.value.taskTypeId) {
@@ -35,30 +42,33 @@ const checkTask = async () => {
 			})
 			break
 		}
-		case 2: {
-			await api.post('task-answers', userAnswer.value).then((res) => {
-				// ааа
-			})
-			break
+        case 2: {
+            if (user.value) {
+                await api.post(`tasks/${theTask.value.id}/save-answer`, {...userAnswer.value, userId:user.value?.id}).then((res) => {
+                })
+            }
+            break
 		}
-		case 3: {
-			let i = 0
-			let areAllRight = true
-			for (; i < correlations.value.length; i++) {
-				let indexOfLeft = i
-				let userInput = userCorrelations.value[i]
-				if (userInput) {
-					let startCode = 'a'.charCodeAt(0)
-					let userChar = userInput.right
-					let index = userChar.charCodeAt(0) - startCode
-					areAllRight = indexOfLeft == index
-					if (!areAllRight) break
-				} else {
-					areAllRight = false
-					break
-				}
-			}
-			userAnswer.value.isRight = areAllRight
+        case 3: {
+            let isRight = true
+            for (let i = 0; i < mixedCorrelations.value.length; i++) {
+                let userPut = userIndexCorrelations.value[i] // например, b) = index = 1
+                if (userPut) {
+                    let index0 = 'a'.charCodeAt(0)
+                    let userIndex = userPut.charCodeAt(0) - index0 // b - a == 1
+                    let selectedId = mixedCorrelations.value[userIndex].rightId // по индексу ищем ответ
+                    let leftId = mixedCorrelations.value[i]?.id
+                    if (selectedId != leftId) {
+                        isRight = false;
+                        break
+                    }
+                }
+                else {
+                    isRight = false;
+                    break
+                }
+            }
+			userAnswer.value.isRight = isRight
 			break
 		}
 		case 4: {
@@ -73,7 +83,7 @@ const checkTask = async () => {
 			break
 		}
 		case 5: {
-			let areAllRight = true
+            let areAllRight = true
 			for (let answer of answerOptions.value) {
 				let didUserSelectIt = userAnswer.value.selectedTaskAnswersId.includes(answer.id)
 				if ((didUserSelectIt && !answer.isRight) || (answer.isRight && !didUserSelectIt)) {
@@ -84,74 +94,81 @@ const checkTask = async () => {
 			userAnswer.value.isRight = areAllRight
 			break
 		}
-		// сохранение файла в базе
 		case 6: {
-			await api.post('task-answers', userAnswer.value).then((res) => {})
+            if (user.value) {
+                
+                await api.post(`tasks/${theTask.value.id}/save-answer`, {...userAnswer.value, userId:user.value?.id}).then((res) => {
+                })
+            }
 			break
 		}
 	}
 }
-defineExpose({ checkTask })
+const update = async (task:Task) => {
+    theTask.value = task;
+    await loadData();
+}
+defineExpose({ checkTask, update })
+
+const emit = defineEmits(['deleteClick', 'startEdit'])
+const deleteClick = (task:Task) => {
+    emit('deleteClick', task)
+}
 const loadData = async () => {
-	// 1 - простая задача        ответ-готовый точный 1 ответ => проверка может быть на месте
-	if (theTask.value.taskTypeId == 1) {
-		await api.get<TaskAnswer[]>(`tasks/${theTask.value.id}/answers`).then((res) => {
-			answer.value = res.data.pop()
-		})
-	}
-	// 2 - задача с текстовым ответом, без автопроверки => при проверке сохранение введенного ответа
-	else if (theTask.value.taskTypeId == 2) {
-	}
-	// 3 - задача соотношения
-	else if (theTask.value.taskTypeId == 3) {
-		await api.get<Correlation[]>(`tasks/${theTask.value.id}/correlations`).then((res) => {
-			let correctList: Correlation[] = res.data
-			/*
-                                                let mixed: Correlation[] = []
-                                                let rightNumbers: number[] = []
-                                                while(rightNumbers.length != correctList.length) {
-                                                                let newRandom = randomInt(0, correctList.length-1);
-                                                                if (!rightNumbers.includes(newRandom)) {
-                                                                                rightNumbers.push(newRandom)
-                                                                }
-                                                }
-                                                let i = 0;
-                                                for (let num of rightNumbers) {
-                                                                let correlation = correctList[num];
-                                                                let leftCorrelation = correctList[i];
-                                                                if (correlation && leftCorrelation) {
-                                                                                mixed.push({
-                                                                                                left: leftCorrelation.left,
-                                                                                                right: correlation.right,
-                                                                                                id: 0
-                                                                                })
-                                                                                i++;
-                                                                }
-                                                }
-                                                */
-			correlations.value = correctList
-			for (let correlation of correctList) {
-				userCorrelations.value.push({
-					left: '',
-					right: '',
-					id: correlation.id,
-				})
-			}
-		})
-	}
-	// 4, 5 задача с 1/несколькими ответом из нескольких
-	else if (theTask.value.taskTypeId == 4 || theTask.value.taskTypeId == 5) {
-		await api.get<TaskAnswer[]>(`tasks/${theTask.value.id}/answers`).then((res) => {
-			answerOptions.value = res.data
-		})
-	}
+    if (theTask.value.id != 0) {
+        if (theTask.value.taskTypeId == 1) {
+            await api.get<TaskAnswer[]>(`tasks/${theTask.value.id}/answers`).then((res) => {
+                answer.value = res.data.pop()
+            })
+        }
+        else if (theTask.value.taskTypeId == 3) {
+            await api.get<Correlation[]>(`tasks/${theTask.value.id}/correlations`).then((res) => {
+                originalCorrelations.value = res.data
+                correlationOptionsIndexes.value = []
+                for (let i = 0; i < originalCorrelations.value.length; i++) {
+                    originalCorrelations.value[i].rightId = originalCorrelations.value[i].id
+                    correlationOptionsIndexes.value?.push(indexToChar(i) + ")")
+                }
+                mixCorrelations()
+            })
+        }
+        else if (theTask.value.taskTypeId == 4 || theTask.value.taskTypeId == 5) {
+            await api.get<TaskAnswer[]>(`tasks/${theTask.value.id}/answers`).then((res) => {
+                answerOptions.value = res.data
+            })
+        }
+    }
+}
+
+const mixCorrelations = () => {
+    const rights = originalCorrelations.value.map(c => ({
+        ...c
+    }))
+    for (let i = rights.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rights[i], rights[j]] = [rights[j], rights[i]];
+    }
+    for (let i = 0; i < rights.length; i++) {
+        rights[i].left = originalCorrelations.value[i].left
+        rights[i].id = originalCorrelations.value[i].id
+    }
+    mixedCorrelations.value = rights
+}
+const startEditingTask = (task:Task) => {
+    emit('startEdit', task)
 }
 </script>
 
 <template>
-	<div :class="{ is_right: userAnswer.isRight == true, is_false: userAnswer.isRight == false }">
+	<div>
+        <div v-if="props.isEditing" class="control_div">
+            <span class="m-1 text-muted">Порядок: {{ theTask.order }}</span>
+            <button class="btn btn-outline-danger m-1" @click="deleteClick(task)">❌</button>
+            <button class="btn btn-outline-warning m-1" @click="startEditingTask(task)">✏️</button>
+	    </div>
+        <h5 :class="{'question-p-correct': userAnswer.isRight == true, 'question-p-bad': userAnswer.isRight == false
+            }">Задание {{ props.index + 1 }}: {{ theTask.question }}</h5>
 		<div v-if="theTask.taskTypeId == 1 || theTask.taskTypeId == 2">
-			<p>{{ theTask.question }}</p>
 			<p>
 				<label>
 					<span>Ответ:</span>
@@ -160,10 +177,9 @@ const loadData = async () => {
 			</p>
 		</div>
 		<div v-else-if="theTask.taskTypeId == 3">
-			<p>{{ theTask.question }}</p>
-			<table>
+			<table >
 				<tbody>
-					<tr v-for="(correlation, index) in correlations">
+					<tr v-for="(correlation, index) in mixedCorrelations">
 						<td>
 							<p>{{ index + 1 }}) {{ correlation.left }}</p>
 						</td>
@@ -175,27 +191,27 @@ const loadData = async () => {
 			</table>
 			<table>
 				<tbody>
-					<tr v-for="(correlation, index) in userCorrelations">
+					<tr v-for="(correlation, index) in mixedCorrelations">
 						<td>
 							<p>{{ index + 1 }})</p>
 						</td>
 						<td>
-							<input v-model="correlation.right" />
+                            <select class="form-control-sm" v-model="userIndexCorrelations[index]">
+                                <option :value="opt" v-for="opt in correlationOptionsIndexes">{{ opt }}</option>
+                            </select>
 						</td>
 					</tr>
 				</tbody>
 			</table>
 		</div>
 		<div v-else-if="theTask.taskTypeId == 4">
-			<p>{{ theTask.question }}</p>
-			<select v-model="userAnswer.selectedTaskAnswerId" size="5">
+			<select v-model="userAnswer.selectedTaskAnswerId">
 				<option v-for="answerOption in answerOptions" :value="answerOption.id">
 					{{ answerOption.textValue }}
 				</option>
 			</select>
 		</div>
 		<div v-else-if="theTask.taskTypeId == 5">
-			<p>{{ theTask.question }}</p>
 			<select v-model="userAnswer.selectedTaskAnswersId" size="5" multiple>
 				<option v-for="answerOption in answerOptions" :value="answerOption.id">
 					{{ answerOption.textValue }}
@@ -203,7 +219,6 @@ const loadData = async () => {
 			</select>
 		</div>
 		<div v-else-if="theTask.taskTypeId == 6">
-			<p>{{ theTask.question }}</p>
 			<p>
 				<label>
 					<span>Прикрепите файл:</span>
@@ -215,10 +230,13 @@ const loadData = async () => {
 </template>
 
 <style scoped>
-.is_right {
-	background-color: green;
+.question-p-correct::before {
+    content: '✔️';
 }
-.is_false {
-	background-color: red;
+.question-p-bad::before {
+    content: '❌';
+}
+td {
+    padding: 5px;
 }
 </style>

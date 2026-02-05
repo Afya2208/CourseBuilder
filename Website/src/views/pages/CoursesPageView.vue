@@ -4,7 +4,6 @@ import api from '@/services/api'
 import { onMounted, provide, ref } from 'vue'
 import ThemeListView from '../components/ThemeListView.vue'
 import CourseListView from '../components/CourseListView.vue'
-import LessonEditorView from './LessonEditorView.vue'
 
 const courses = ref<Course[]>()
 const themes = ref<Theme[]>()

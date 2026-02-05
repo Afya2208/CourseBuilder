@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using API.Exceptions;
 using API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Dto;
 using Models.Entities;
 
 namespace API.Controllers
@@ -19,7 +21,6 @@ namespace API.Controllers
             var contentBlocks = await contentBlockRepository.FindAllByLessonId(lessonId);
             return Ok(contentBlocks);
         }
-
         [HttpGet("content-block-types")]
         public async Task<IActionResult> FindAllTypes()
         {
@@ -28,51 +29,48 @@ namespace API.Controllers
         }
 
         [HttpPost("content-blocks")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> Add([FromBody] ContentBlock contentBlock)
+        public async Task<IActionResult> Add([FromForm] ContentBlockFormData contentBlock)
         {
-            var saved = await contentBlockRepository.AddAsync(contentBlock);
-            return Ok(saved);
-        }
-        [HttpPost("content-blocks/with-file")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> AddWithFile([FromForm] ContentBlock contentBlock)
-        {
-            /*
-            var newBlock = new ContentBlock
+            var newBlock = new ContentBlock();
+            newBlock.Name = contentBlock.Name;
+            newBlock.TextValue = contentBlock.TextValue;
+            newBlock.ContentBlockTypeId = contentBlock.ContentBlockTypeId;
+            newBlock.FileName = contentBlock.FileName;
+            newBlock.LessonId = contentBlock.LessonId;
+            newBlock.Order = contentBlock.Order;
+            if (contentBlock.File != null)
             {
-                ContentBlockTypeId = dto.ContentBlockTypeId,
-                Order = dto.Order,
-                Name = dto.Name,
-                TextValue = dto.TextValue,
-                LessonId = dto.LessonId,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            };
-
-            // Обработка файла, если он есть
-            if (dto.File != null && dto.File.Length > 0)
-            {
-                await ProcessFileUpload(dto.File, contentBlock);
+                using var stream = new MemoryStream();
+                await contentBlock.File.CopyToAsync(stream);
+                newBlock.File = stream.ToArray(); 
+                newBlock.FileName = contentBlock.FileName;
             }
-            */
-            var saved = await contentBlockRepository.AddAsync(contentBlock);
-            return Ok(saved);
+            var saved = await contentBlockRepository.AddAsync(newBlock);
+            return Ok(saved.Id);
         }
 
         [HttpPut("content-blocks")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> Update(ContentBlock contentBlock)
+        public async Task<IActionResult> Update([FromForm] ContentBlockFormData contentBlock)
         {
-            var saved = await contentBlockRepository.UpdateAsync(contentBlock);
-            return Ok(saved);
-        }
-        [HttpPut("content-blocks/with-file")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> UpdateWithFile([FromForm]ContentBlock contentBlock)
-        {
-            var saved = await contentBlockRepository.UpdateAsync(contentBlock);
-            return Ok(saved);
+            var oldBlock = await contentBlockRepository.FindByIdAsync(contentBlock.Id);
+            if (oldBlock != null)
+            {
+                oldBlock.Name = contentBlock.Name;
+                oldBlock.TextValue = contentBlock.TextValue;
+                oldBlock.ContentBlockTypeId = contentBlock.ContentBlockTypeId;
+                oldBlock.FileName = contentBlock.FileName;
+                oldBlock.Order = contentBlock.Order;
+                if (contentBlock.File != null)
+                {
+                    using var stream = new MemoryStream();
+                    await contentBlock.File.CopyToAsync(stream);
+                    oldBlock.File = stream.ToArray(); 
+                    oldBlock.FileName = contentBlock.FileName;
+                }
+                var saved = await contentBlockRepository.UpdateAsync(oldBlock);
+                return Ok();
+            }
+            throw new NotFoundException("Блок не найден");
         }
 
         [HttpDelete("content-blocks/{blockId:long}")]

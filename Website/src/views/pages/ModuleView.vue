@@ -34,6 +34,21 @@ const getData = async () => {
 	})
 }
 const saveSelectedLesson = async () => {
+
+    if (!selectedLesson.value.name) {
+        alert("Укажите название")
+        return
+    }
+    if (!selectedLesson.value.description) {
+        alert("Укажите описание")
+        return
+    }
+    if (Number.isNaN(Number.parseInt(selectedLesson.value.order.toString())) || selectedLesson.value.order < 1) {
+        alert("Укажите порядок > 0")
+        return
+    }
+    selectedLesson.value.order = Math.trunc(selectedLesson.value.order);
+
 	if (selectedLesson.value.id == 0) {
 		await api
 			.post<Lesson>('lessons', selectedLesson.value)
@@ -70,7 +85,7 @@ const getNullLesson = (): Lesson => {
 		description: '',
 		moduleId: moduleId,
 		lessonTypeId: 1,
-		order: 1,
+		order: lessons.value.length + 1,
 	}
 }
 const addLesson = () => {
@@ -137,7 +152,11 @@ const selectedLesson = ref<Lesson>(getNullLesson())
 					<p>{{ lesson.description }}</p>
 					<p>
 						<RouterLink
-							class="btn btn-outline-primary"
+							class="btn"
+                            :class="{
+                                'btn-outline-success': lesson.lessonTypeId == 1,
+                                'btn-outline-danger': lesson.lessonTypeId == 2
+                            }"
 							:to="`/courses/modules/lessons/${lesson.id}`"
 							>Перейти к занятию</RouterLink
 						>
@@ -171,7 +190,7 @@ const selectedLesson = ref<Lesson>(getNullLesson())
 			<BFormFloatingLabel class="my-2" label="Название" label-for="lesson-name">
 				<BFormInput
 					id="lesson-name"
-					v-model="selectedLesson.name"
+					v-model.trim="selectedLesson.name"
 					type="text"
 					placeholder="Новое занятие"
 				/>
@@ -180,7 +199,7 @@ const selectedLesson = ref<Lesson>(getNullLesson())
 			<BFormFloatingLabel class="my-2" label="Описание" label-for="lesson-desc">
 				<BFormInput
 					id="lesson-desc"
-					v-model="selectedLesson.description"
+					v-model.trim="selectedLesson.description"
 					type="text"
 					placeholder="Описание..."
 				/>
@@ -200,11 +219,10 @@ const selectedLesson = ref<Lesson>(getNullLesson())
 			<BFormFloatingLabel class="my-2" label="Порядок" label-for="module-order">
 				<BFormInput
 					id="module-order"
-					v-model="selectedLesson.order"
+					v-model.number="selectedLesson.order"
 					:disabled="!module?.lessonsHaveOrder"
-					type="number"
-					min="1"
-					max="100"
+					type="text"
+                    pattern="\d*"
 					placeholder="1"
 				/>
 			</BFormFloatingLabel>

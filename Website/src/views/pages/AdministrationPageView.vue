@@ -4,27 +4,18 @@ import api from '@/services/api'
 import { useUserStore } from '@/stores/user'
 import {
 	BButton,
-	BCard,
-	BCardText,
-	BCardTitle,
     BForm,
     BModal,
 	BFormFloatingLabel,
-	BInput,
-	BCardBody,
     BFormSelect,
     BFormInput,
-	BTable,
-	BTbody,
     useToggle,
 } from 'bootstrap-vue-next'
-import { storeToRefs } from 'pinia'
-import { computed, onMounted, onUpdated, ref, watch } from 'vue'
+import { onMounted, ref } from 'vue'
 
 const users = ref<User[]>([])
 const roles = ref<Role[]>([])
 const userStore = useUserStore()
-const { user, fullName } = storeToRefs(userStore)
 
 onMounted(async () => {
 	await fetch()
@@ -39,10 +30,10 @@ const fetch = async () => {
 	})
 }
 const changePassword = async (user: User) => {
-    if (confirm(`Вы уверены, что хотите сменить пароль у ${user.email}`)) {
+    if (confirm(`Вы уверены, что хотите сменить пароль у ${user.email}?`)) {
         let newPassword = prompt("Введите новый пароль")
         if (newPassword) {
-            await api.post("users/"+user.id + "/change-password", {newPassword}).then(res => {
+            await api.post("users/"+user.id + "/change-password", {password: newPassword, userId:user.id}).then(res => {
                 alert("Пароль успешно изменен")
             })
         }
@@ -59,8 +50,6 @@ const { hide: hideModal, show: showModal} = useToggle("user-modal")
 const addUser = async () => {
 	showModal()
 }
-
-
 const startEditingUser = (user:User, index:number) => {
     selectedUserIndex.value = index
     userEditable.value = {
@@ -104,6 +93,16 @@ const close = () => {
 	hideModal()
 }
 const saveUser = async () => {
+
+    if (!userEditable.value.email) {
+        alert("Укажите email")
+        return
+    }
+    if (userEditable.value.id == 0 && (!userEditable.value.password || userEditable.value.password.length < 8)) {
+        alert("Укажите пароль как минимум 8 символов")
+        return
+    }
+
 	if (userEditable.value.id == 0) {
 		await api
             .post<User>('sign-up', { ...userEditable.value, ...userEditable.value.userInformation })
@@ -118,7 +117,8 @@ const saveUser = async () => {
                     alert('Ошибка, данная почта уже занята')
                 }
 			})
-	} else {
+    } else {
+        console.log(JSON.stringify(userEditable.value))
 		await api
 			.put<User>('users', userEditable.value)
 			.then((res) => {
@@ -301,4 +301,6 @@ const selectedUserIndex = ref<number>()
 		</template>
 	</BModal>
 </template>
-<style scoped></style>
+<style scoped>
+
+</style>

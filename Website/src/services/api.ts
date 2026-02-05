@@ -17,7 +17,10 @@ api.interceptors.request.use(
 		}
 		return config
 	},
-	(error) => {
+    (error) => {
+        if (error.code == "ERR_NETWORK") {
+            alert("Ошибка: не получается подключиться к серверу")
+        }
 		return Promise.reject(error)
 	},
 )
@@ -26,7 +29,10 @@ api.interceptors.response.use(
 	(response: AxiosResponse) => {
 		return response // дальнейшая передача ответа до места запроса
 	},
-	(error: AxiosError) => {
+    (error: AxiosError) => {
+        if (error.code == "ERR_NETWORK") {
+            alert("Ошибка: не получается подключиться к серверу")
+        }
 		if (error.status == 401) {
 			const userStore = useUserStore()
 			if (userStore.token) {

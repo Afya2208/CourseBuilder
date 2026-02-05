@@ -42,7 +42,8 @@ const getNullCourse = (): CourseEditable => {
 		name: '',
 		description: '',
 		authorId: user.value?.id ?? 0,
-		themesIds: [],
+        themesIds: [],
+        price: 0,
 		minimalCompletionPercentage: 100,
 		modulesHaveOrder: true,
 	}
@@ -51,13 +52,37 @@ const close = () => {
 	if (editableCourse.value.id != 0) {
 		selectedCourseIndex.value = undefined
 		editableCourse.value = getNullCourse()
-		hideCourseModal()
-	}
+    }
+    hideCourseModal()
 }
 
 const editableCourse = ref<CourseEditable>(getNullCourse())
 const selectedCourseIndex = ref<number>()
 const saveCourse = async () => {
+
+    if (!editableCourse.value.description) {
+        alert("Укажите описание")
+        return
+    }
+    if (Number.isNaN(Number.parseInt(editableCourse.value.price.toString()))) {
+        alert("Укажите стоимость")
+        return
+    } else if (editableCourse.value.price < 0) {
+        alert("Укажите стоимость >= 0")
+        return
+    }
+    if (!editableCourse.value.minimalCompletionPercentage || editableCourse.value.minimalCompletionPercentage < 1
+        || editableCourse.value.minimalCompletionPercentage > 100) {
+        alert("Укажите минимальный процент прохождения >= 1 и <= 100")
+        return
+    }
+    if (!editableCourse.value.name) {
+        alert("Укажите название")
+        return
+    }
+    editableCourse.value.minimalCompletionPercentage = Math.trunc(editableCourse.value.minimalCompletionPercentage);  
+    editableCourse.value.price = Math.trunc(editableCourse.value.price); 
+
 	if (editableCourse.value.id == 0) {
 		await api
 			.post<Course>('courses', editableCourse.value)
@@ -163,7 +188,7 @@ const searchCourses = async () => {
 			<BFormFloatingLabel class="my-2" label="Название" label-for="course-name">
 				<BFormInput
 					id="course-name"
-					v-model="editableCourse.name"
+					v-model.trim="editableCourse.name"
 					type="text"
 					placeholder="Новый курс"
 				/>
@@ -172,7 +197,7 @@ const searchCourses = async () => {
 			<BFormFloatingLabel class="my-2" label="Описание" label-for="course-desc">
 				<BFormInput
 					id="course-desc"
-					v-model="editableCourse.description"
+					v-model.trim="editableCourse.description"
 					type="text"
 					placeholder="Описание..."
 				/>
@@ -183,7 +208,10 @@ const searchCourses = async () => {
 				label="Стоимость (если необходимо)"
 				label-for="course-price"
 			>
-				<BFormInput v-model="editableCourse.price" id="course-price" type="number" />
+				<BFormInput
+                    type="text"
+                    pattern="\d*"
+                 v-model.number="editableCourse.price" id="course-price"  />
 			</BFormFloatingLabel>
 
 			<BFormCheckbox id="course-modules-have-order" v-model="editableCourse.modulesHaveOrder">
@@ -197,8 +225,11 @@ const searchCourses = async () => {
 			>
 				<BFormInput
 					id="course-min-percentage"
-					type="number"
-					v-model="editableCourse.minimalCompletionPercentage"
+                    min="1"
+                    type="text"
+                    pattern="\d*"
+					max="100"
+					v-model.number="editableCourse.minimalCompletionPercentage"
 				/>
 			</BFormFloatingLabel>
 

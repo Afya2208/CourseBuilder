@@ -43,7 +43,7 @@ namespace API.Controllers
             if (userDb == null) throw new NotFoundException($"Не найден пользователь id={userId}"); 
             return Ok(userDb.ToDto());
         }
-        [AllowAnonymous]
+
         [HttpPost("sign-in")]
         public async Task<IActionResult> SignIn([FromBody] SignInRequest request)
         {
@@ -51,12 +51,18 @@ namespace API.Controllers
         }
 
         [HttpPost("sign-up")]
-        [Authorize(Roles = "Администратор")]
         public async Task<IActionResult> SignUp([FromBody] SignUpRequest request)
         {
             var user = await authService.SignUpAsync(request);
             user.Role = await roleRepository.FindByIdAsync(user.RoleId);
             return Ok(user.ToDto());
+        }
+        [HttpPost("users/{userId:long}/change-password")]
+        [Authorize(Roles = "Администратор")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+        {
+            await authService.ChangePassword(request);
+            return Ok();
         }
         [HttpDelete("users/{userId:long}")]
         [Authorize(Roles="Администратор")]
@@ -65,10 +71,10 @@ namespace API.Controllers
             return Ok((await userRepository.DeleteAsync(userId)).ToDto());
         }
         [HttpPut("users")]
-        [Authorize(Roles="Администратор")]
         public async Task<IActionResult> Update([FromBody] UserDto userToUpdate)
         {
-            return Ok((await userRepository.UpdateAsync(userToUpdate.ToEntity())).ToDto());
+            var userDbType = userToUpdate.ToEntity();
+            return Ok((await userRepository.UpdateAsync(userDbType)).ToDto());
         }
     }
 }

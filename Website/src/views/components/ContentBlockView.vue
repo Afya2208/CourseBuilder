@@ -8,9 +8,9 @@ const props = defineProps<{
 	isEditing: Boolean
 }>()
 const content = ref<ContentBlock>(props.content)
-
 onMounted(async () => {
-	if (content.value.contentBlockTypeId == 2 || content.value.contentBlockTypeId == 3) {
+    if (content.value.id != 0) {
+        if (content.value.contentBlockTypeId == 2 || content.value.contentBlockTypeId == 3) {
 		await api
 			.get(`content-blocks/${content.value.id}/file`, {
 				responseType: 'blob',
@@ -18,15 +18,18 @@ onMounted(async () => {
 			.then((res) => {
 				content.value.fileData = URL.createObjectURL(res.data)
 			})
-	}
+	    }
+    }
 })
 onUnmounted(() => {
 	if (content.value.contentBlockTypeId == 2 || content.value.contentBlockTypeId == 3) {
 		if (content.value.fileData) {
 			URL.revokeObjectURL(content.value.fileData)
 		}
-	}
+    }
 })
+
+
 
 const loadFile = (event: Event, block: ContentBlock, extensions?: string[]) => {
 	const input = event.target as HTMLInputElement
@@ -40,52 +43,40 @@ const loadFile = (event: Event, block: ContentBlock, extensions?: string[]) => {
 	}
 	const reader = new FileReader()
 	reader.onload = (e) => {
-		const result = e.target?.result
-		if (result) {
-			if (typeof result === 'string') {
-				block.fileUrl = result
-			} else {
-				const bytes = new Uint8Array(result)
-				let binary = ''
-				for (let i = 0; i < bytes.byteLength; i++) {
-					binary += String.fromCharCode(bytes[i])
-				}
-				block.fileData = btoa(binary)
-			}
-			block.fileName = file.name
-			block.fileMimeType = file.type
-			block.file = file
-		}
+        const result = e.target?.result
+        block.fileName = file.name
+        block.file = file
+        if (block.contentBlockTypeId == 2 || block.contentBlockTypeId == 3) {
+            if (typeof(result) == "string") {
+                block.fileData = result
+            }
+        }
 	}
-	if (block.contentBlockTypeId === 2 || block.contentBlockTypeId === 3) {
-		reader.readAsDataURL(file)
-	} else {
-		reader.readAsArrayBuffer(file)
-	}
+    reader.readAsDataURL(file)
 }
-
+const emit = defineEmits(['delete-click'])
 const downloadFile = async () => {
-	if (content.value.contentBlockTypeId == 4 && content.value.fileName) {
-		await api
-			.get(`content-blocks/${content.value.id}/file-stream`, {
-				responseType: 'blob',
-			})
-			.then((res) => {
-				const a = document.createElement('a')
-				a.href = window.URL.createObjectURL(res.data)
-				a.download = content.value.fileName ?? ''
-				document.body.appendChild(a)
-				a.click()
-				window.URL.revokeObjectURL(a.href)
-				document.body.removeChild(a)
-			})
-	}
+    if (content.value.contentBlockTypeId == 4 && content.value.fileName) {
+        await api.get(`content-blocks/${content.value.id}/file-stream`, {responseType: 'blob',})
+        .then((res) => {
+            const a = document.createElement('a')
+            a.href = window.URL.createObjectURL(res.data)
+            a.download = content.value.fileName ?? 'file'
+            document.body.appendChild(a)
+            a.click()
+            window.URL.revokeObjectURL(a.href)
+            document.body.removeChild(a)
+        })
+    }
+}
+const deleteClick = (block:ContentBlock) => {
+    emit("delete-click", block)
 }
 </script>
 
 <template>
-    <div>
-        <div v-if="props.isEditing">
+    <div class="m-0 p-0">
+        <div v-if="props.isEditing" class="control_div">
             <span class="m-1">Тип</span>
             <select v-model="content.contentBlockTypeId">
                 <option value="1">Текст</option>
@@ -100,108 +91,108 @@ const downloadFile = async () => {
                 class="form-control d-inline-block w-auto ml-2"
                 style="width: 80px"
             />
+            <button class="btn btn-outline-danger m-1" @click="deleteClick(content)">❌</button>
 	    </div>
     
-
-        <div class="text_div" v-if="content.contentBlockTypeId == 1">
-            <!--text-->
+        <div class="text_div m-0 p-0" v-if="content.contentBlockTypeId == 1">
             <div v-if="props.isEditing">
                 <input
                     v-model="content.name"
                     placeholder="Заголовок блока текста"
-                    class="form-control mb-2"
-                />
+                    class="form-control mb-2"/>
                 <textarea
                     v-model="content.textValue"
                     placeholder="Содержание..."
                     class="form-control"
-                    rows="3"
-                />
+                    rows="3"/>
             </div>
-            <div v-else>
+            <div v-else class="m-0 p-0">
                 <h3>{{ content.name }}</h3>
-                <p v-html="content.textValue"></p>
+                <p style="white-space: pre-line;" v-html="content.textValue"></p>
             </div>
         </div>
-        <div class="image_div" v-else-if="content.contentBlockTypeId == 2">
-            <!--image file-->
+        <div class="image_div m-0 p-1" v-else-if="content.contentBlockTypeId == 2">
             <input
                 v-if="props.isEditing"
                 type="file"
                 @change="loadFile($event, content, ['png', 'jpeg', 'jpg', 'gif', 'webp'])"
                 accept=".png,.jpeg,.jpg,.gif,.webp"
-                class="form-control mb-2"
-            />
+                class="form-control mb-2"/>
             <img
                 class="img-fluid"
-                style="max-height: 300px"
+                style="max-height: 500px; max-width: 90%;"
                 alt="Изображение"
-                :src="content.fileData"
-            />
+                :src="content.fileData"/>
             <input
                 v-if="props.isEditing"
                 v-model="content.name"
                 placeholder="Подпись для рисунка"
-                class="form-control mb-2"
-            />
+                class="form-control mb-2"/>
             <p v-else>{{ content.name }}</p>
         </div>
-        <div class="pdf_div" v-else-if="content.contentBlockTypeId == 3">
-            <!--pdf file-->
+        <div class="pdf_div m-0 p-0" v-else-if="content.contentBlockTypeId == 3">
             <input
                 v-if="props.isEditing"
                 v-model="content.name"
                 placeholder="Заголовок для pdf файла"
-                class="form-control mb-2"
-            />
+                class="form-control mb-2"/>
             <p v-else>{{ content.name }}</p>
             <input
                 v-if="props.isEditing"
                 v-model="content.textValue"
                 placeholder="Описание для pdf файла"
-                class="form-control mb-2"
-            />
+                class="form-control mb-2"/>
+            <input
+                v-if="props.isEditing"
+                type="file"
+                @change="loadFile($event, content, ['pdf'])"
+                accept=".pdf"
+                class="form-control mb-2"/>
             <p v-else class="description_p">{{ content.textValue }}</p>
             <iframe :src="content.fileData" v-if="content.fileData"></iframe>
             <p v-else>Файл не загрузился...</p>
         </div>
-        <div class="file_to_download_div" v-else-if="content.contentBlockTypeId == 4"> <!--file to download-->
-            <div v-if="props.isEditing">
+        <div class="file_to_download_div m-0 p-0" v-else-if="content.contentBlockTypeId == 4"> <!--file to download-->
+            <div v-if="props.isEditing" class="file_to_download_div m-0 p-0">
                 <p class="mb-2">Прикрепите файл</p>
                 <input type="file" @change="loadFile($event, content)" class="form-control" />
                 <p v-if="content.fileName" class="mt-2">Файл: {{ content.fileName }}</p>
                 <input
-                    v-if="props.isEditing"
                     v-model="content.name"
                     placeholder="Заголовок для файла"
                     class="form-control mb-2"
                 />
                 <input
-                    v-if="props.isEditing"
                     v-model="content.textValue"
                     placeholder="Описание для файла"
                     class="form-control mb-2"
                 />
             </div>
-            <div v-else>
+            <div v-else class="file_to_download_div m-0 p-0">
                 <p>{{ content.name }}</p>
                 <img
-                    src="../../assets/excel-icon.jpg"
+                    src="../../assets/xlsx.png"
                     title="Скачать файл"
                     @click="downloadFile()"
                     v-if="content.fileName?.split('.').pop() == 'xlsx'"
                 />
                 <img
-                    src="../../assets/docx-icon.png"
+                    src="../../assets/doc.png"
                     title="Скачать файл"
                     @click="downloadFile()"
                     v-else-if="content.fileName?.split('.').pop() == 'docx'"
                 />
                 <img
-                    src="../../assets/pdf-icon.png"
+                    src="../../assets/pdf.png"
                     title="Скачать файл"
                     @click="downloadFile()"
                     v-else-if="content.fileName?.split('.').pop() == 'pdf'"
+                />
+                <img
+                    src="../../assets/file.png"
+                    title="Скачать файл"
+                    @click="downloadFile()"
+                    v-else
                 />
                 <p>{{ content.textValue }}</p>
                 <a download @click="downloadFile()">Скачать файл</a>
@@ -210,12 +201,7 @@ const downloadFile = async () => {
     </div>
 </template>
 <style scoped>
-div {
-	margin: 5px;
-	padding: 5px;
-	border: 2px solid red;
-	border-radius: 5px;
-}
+
 .file_to_download_div,
 .image_div,
 .pdf_div {
@@ -223,6 +209,12 @@ div {
 	align-items: center;
 	flex-direction: column;
 	justify-content: start;
+}
+.control_div {
+    display: flex;
+	align-items: center;
+    justify-content: center;
+    margin-block: 10px;
 }
 .file_to_download_div a {
 	cursor: pointer;

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using API.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Models.Dto;
 using Models.Entities;
 
 namespace API.Controllers
@@ -15,25 +16,15 @@ namespace API.Controllers
         [HttpGet("tasks/{taskId:long}/answers")]
         public async Task<IActionResult> FindAllByTaskId(long taskId)
         {
-            return Ok(await taskAnswerRepository.FindAllByConditionAsync(x=>x.TaskId == taskId));
+            var answers = await taskAnswerRepository.FindAllByConditionAsync(x => x.TaskId == taskId);
+            var answersDto = answers.ConvertAll(x=>x.ToDto());
+            return Ok(answersDto);
         }
-        [HttpPost("task-answers")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> Add([FromBody] TaskAnswer taskAnswerDto)
+        [Authorize]
+        [HttpPost("tasks/{taskId:long}/save-answer")]
+        public async Task<IActionResult> SaveAnswer([FromBody] TaskAnswerDto taskAnswerDto)
         {
-            return Ok(await taskAnswerRepository.AddAsync(taskAnswerDto));
-        }
-        [HttpPut("task-answers")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> Update([FromBody] TaskAnswer taskAnswerDto)
-        {
-             return Ok(await taskAnswerRepository.UpdateAsync(taskAnswerDto));
-        }
-        [HttpDelete("task-answers/{themeId:int}")]
-        [Authorize(Roles="Разработчик")]
-        public async Task<IActionResult> Delete(int taskAnswerId)
-        {
-             return Ok(await taskAnswerRepository.DeleteAsync(taskAnswerId));
+            return Ok(await taskAnswerRepository.AddAsync(taskAnswerDto.ToEntity()));
         }
     }
 }

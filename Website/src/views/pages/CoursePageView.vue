@@ -67,6 +67,21 @@ const close = () => {
 const editableModule = ref<Module>(getNullModule())
 const selectedModuleIndex = ref<number>()
 const saveModule = async () => {
+
+    if (!editableModule.value.description) {
+        alert("Укажите описание")
+        return
+    }
+    if (!editableModule.value.name) {
+        alert("Укажите название")
+        return
+    }
+    if (Number.isNaN(Number.parseInt(editableModule.value.order.toString())) || editableModule.value.order < 1) {
+        alert("Укажите порядок > 0")
+        return
+    }
+    editableModule.value.order = Math.trunc(editableModule.value.order);  
+
 	if (editableModule.value.id == 0) {
 		await api
 			.post<Module>('modules', editableModule.value)
@@ -181,7 +196,7 @@ const startEditingModule = async (module: Module, index: number) => {
 			<BFormFloatingLabel class="my-2" label="Название" label-for="module-name">
 				<BFormInput
 					id="module-name"
-					v-model="editableModule.name"
+					v-model.trim="editableModule.name"
 					type="text"
 					placeholder="Новый модуль"
 				/>
@@ -190,7 +205,7 @@ const startEditingModule = async (module: Module, index: number) => {
 			<BFormFloatingLabel class="my-2" label="Описание" label-for="module-desc">
 				<BFormInput
 					id="module-desc"
-					v-model="editableModule.description"
+					v-model.trim="editableModule.description"
 					type="text"
 					placeholder="Описание..."
 				/>
@@ -203,11 +218,10 @@ const startEditingModule = async (module: Module, index: number) => {
 			<BFormFloatingLabel class="my-2" label="Порядок" label-for="module-order">
 				<BFormInput
 					id="module-order"
-					v-model="editableModule.order"
+					v-model.number="editableModule.order"
 					:disabled="!course?.modulesHaveOrder"
-					type="number"
-					min="1"
-					max="100"
+					type="text"
+                    pattern="\d*"
 					placeholder="1"
 				/>
 			</BFormFloatingLabel>

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using API.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Models.Dto;
 
 namespace API.Controllers
 {
@@ -13,7 +14,9 @@ namespace API.Controllers
         [HttpGet("tasks/{taskId:long}/correlations")]
         public async Task<IActionResult> FindAllByTaskId(long taskId)
         {
-            return Ok(await correlationRepository.FindAllByConditionAsync(x=>x.TaskId == taskId));
+            var corrs = await correlationRepository.FindAllByConditionAsync(x => x.TaskId == taskId);
+            var corrsDto = corrs.ConvertAll(x=>x.ToDto());
+            return Ok(corrsDto);
         }
     }
 }

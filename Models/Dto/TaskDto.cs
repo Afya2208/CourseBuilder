@@ -13,19 +13,11 @@ namespace Models.Dto
 
         public string Question { get; set; } = null!;
 
-        public TaskTypeDto TaskType { get; set; }
+        public int TaskTypeId { get; set; }
 
         public long LessonId { get; set; }
 
         public int Order { get; set; }
 
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<Correlation>? Correlations {get;set;}
-
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public List<TaskAnswer>? Answers {get;set;}
-   
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-        public TaskAnswer? Answer {get;set;}
     }
 }

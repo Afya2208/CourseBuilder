@@ -41,8 +41,12 @@ namespace API.Controllers
         {
             var textIsNull = string.IsNullOrWhiteSpace(text);
             var themeIdIsNull = !themeId.HasValue;
+            if (!textIsNull)
+            {
+                text = text.ToLower();
+            }
             List<Course> courses = await courseRepository.FindAllByConditionAsync(x => (themeIdIsNull || x.Themes.Any(t => t.Id == themeId)) 
-            && (textIsNull || x.Name.Contains(text) || x.Description == null || x.Description.Contains(text)) , [x=>x.Themes]);
+            && (textIsNull || x.Name.ToLower().Contains(text) || x.Description == null || x.Description.ToLower().Contains(text)) , [x=>x.Themes]);
             List<CourseDto> courseDtos = courses.ConvertAll(x=>x.ToDto());
             courseDtos.ForEach(async x=>
             {
