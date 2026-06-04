@@ -1,0 +1,9 @@
+{
+    "BaseUrl" : "http://localhost:5173/",
+    "ConnectionString": "YOUR_TEST_DB",
+    "DeveloperEmail": "TEST_ACCOUNT_EMAIL",
+    "DeveloperPassword": "TEST_ACCOUNT_PASSWORD",
+    "StudentEmail": "TEST_ACCOUNT_EMAIL",
+    "StudentPassword": "TEST_ACCOUNT_PASSWORD"
+}
+

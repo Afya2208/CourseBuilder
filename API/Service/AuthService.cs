@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using System.Security.Authentication;
+using System.Threading.Tasks;
+using API.Exceptions;
+using API.Interface;
+using API.Repositories;
+using API.Util;
+using Microsoft.EntityFrameworkCore;
+using Models.Dto;
+using Models.Entities;
+
+namespace API.Service
+{
+    public class AuthService(UserRepository userRepository, IConfiguration configuration) : IAuthService
+    {
+        public async Task<SignInResponse> SignInAsync(SignInRequest request)
+        {
+            User? user = await userRepository.FindByConditionAsync(x => x.Email == request.Email, [y => y.Role, y => y.UserInformation]);
+            if (user == null) throw new AuthenticationException("Неправильный пароль или логин");
+
+            var passwordHashFromRequest = Hashes.GetPbkdf2Hash(request.Password, user.Salt);
+            if (!passwordHashFromRequest.SequenceEqual(user.Password)) throw new AuthenticationException("Неправильный пароль или логин");
+
+            var token = JwtTokens.GenerateToken(configuration, user);
+            var userDto = user.ToDto();
+            return new SignInResponse()
+            {
+                Token = token,
+                User = userDto
+            };
+        }
+        
+        public async System.Threading.Tasks.Task ChangePassword(ChangePasswordRequest request)
+        {
+            User? user = await userRepository.FindByIdAsync(request.UserId);
+            if (user == null) throw new NotFoundException("Не найден пользователь");
+
+            var newSalt = Hashes.GetNewSalt();
+            var passwordHashFromRequest = Hashes.GetPbkdf2Hash(request.Password, newSalt);
+            user.Salt = newSalt;
+            user.Password = passwordHashFromRequest;
+            await userRepository.UpdateAsync(user);
+        }
+        public async Task<User> SignUpAsync(SignUpRequest request)
+        {
+            // проверка на почту, если уже есть пользователь, то отклоняем запрос
+            User? user = await userRepository.FindByConditionAsync(x=>x.Email == request.Email);
+            if (user != null) throw new ArgumentException("Данная почта уже используется, укажите другую");
+            // теперь хешируем пароль и сохраняем нового пользователя
+            var salt = Hashes.GetNewSalt();
+            var passwordHash = Hashes.GetPbkdf2Hash(request.Password, salt);
+            var newUser = new User()
+            {
+                Salt = salt,
+                Email = request.Email,
+                RoleId = request.RoleId,
+                Password = passwordHash,
+            };
+            var userInfo = new UserInformation()
+            {
+                LastName = request.LastName,
+                MiddleName = request.MiddleName,
+                FirstName = request.FirstName,
+                Phone = request.Phone,
+                Position = request.Position,
+                User = newUser,
+            };
+            newUser.UserInformation = userInfo;
+            var userSaved = await userRepository.AddAsync(newUser);
+            return userSaved;
+        }
+    }
+}

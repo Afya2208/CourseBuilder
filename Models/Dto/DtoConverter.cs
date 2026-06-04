@@ -1,0 +1,260 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection.Emit;
+using System.Threading.Tasks;
+using Models.Entities;
+
+namespace Models.Dto
+{
+    public static class DtoConverter
+    {
+        public static FeedbackSubmit ToEntity(this FeedbackSubmitDto dto)
+        {
+            var entity = new FeedbackSubmit()
+            {
+                Id = dto.Id,
+                Email = dto.Email,
+                UserId = dto.UserId,
+                Title = dto.Title,
+                DateTimeSent = dto.DateTimeSent,
+                DateTimeSolved = dto.DateTimeSolved,
+                Text = dto.Text,
+                FeedbackCategoryId = dto.FeedbackCategoryId,
+            };
+            return entity;
+        }
+        public static FeedbackSubmitDto ToDto(this FeedbackSubmit entity)
+        {
+            var dto = new FeedbackSubmitDto()
+            {
+                Id = entity.Id,
+                Email = entity.Email,
+                UserId = entity.UserId,
+                Title = entity.Title,
+                DateTimeSent = entity.DateTimeSent,
+                DateTimeSolved = entity.DateTimeSolved,
+                Text = entity.Text,
+                FeedbackCategoryId = entity.FeedbackCategoryId,
+            };
+            return dto;
+        }
+        public static UserDto ToDto(this User entity)
+        {
+            var dto = new UserDto()
+            {
+                Id = entity.Id,
+                Email = entity.Email,
+                RoleId = entity.RoleId
+            };
+            if (entity.Role != null)
+            {
+                dto.Role = new RoleDto()
+                {
+                    Id = entity.RoleId,
+                    Name = entity.Role.Name
+                };
+            }
+            if (entity.UserInformation != null)
+            {
+                var info = entity.UserInformation;
+                dto.UserInformation = new UserInformationDto()
+                {
+                    FirstName = info.FirstName,
+                    LastName = info.LastName,
+                    Phone = info.Phone,
+                    Position = info.Position,
+                    MiddleName = info.MiddleName,
+                    UserId = info.UserId
+                };
+            }
+            return dto;
+        }
+        
+        public static User ToEntity(this UserDto dto)
+        {
+            var entity = new User()
+            {
+                Id = dto.Id,
+                Email = dto.Email,
+                RoleId = dto.RoleId
+            };
+            if (dto.UserInformation != null)
+            {
+                var info = dto.UserInformation;
+                entity.UserInformation = new UserInformation()
+                {
+                    FirstName = info.FirstName,
+                    LastName = info.LastName,
+                    Phone = info.Phone,
+                    Position = info.Position,
+                    MiddleName = info.MiddleName,
+                    UserId = info.UserId
+                };
+            }
+            return entity;
+        }
+
+        public static RoleDto ToDto(this Role entity)
+        {
+            var dto = new RoleDto()
+            {
+                Id = entity.Id,
+                Name = entity.Name  
+            };
+            return dto;
+        }
+        public static LessonDto ToDto(this Lesson entity)
+        {
+            var dto = new LessonDto()
+            {
+                Id = entity.Id,
+                Description = entity.Description,
+                ModuleId = entity.ModuleId,
+                Order = entity.Order,
+                ClosedUntil = entity.ClosedUntil,
+                MaxTriesCount = entity.MaxTriesCount,
+                IsRequired = entity.IsRequired,
+                LessonTypeId = entity.LessonTypeId,
+                Name = entity.Name
+            };
+            return dto;
+        }
+        public static TaskTypeDto ToDto(this TaskType entity)
+        {
+            var dto = new TaskTypeDto()
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
+            return dto;
+        }
+        public static TaskAnswerDto ToDto(this TaskAnswer entity)
+        {
+            var dto = new TaskAnswerDto()
+            {
+                Id = entity.Id,
+                TaskId = entity.TaskId,
+                IsRight = entity.IsRight,
+                TextValue = entity.TextValue
+            };
+            return dto;
+        }
+        public static CorrelationDto ToDto(this Models.Entities.Correlation entity)
+        {
+            var dto = new CorrelationDto()
+            {
+                TaskId = entity.TaskId,
+                Id = entity.Id,
+                Right = entity.Right,
+                Left = entity.Left,
+            };
+            return dto;
+        }
+        public static TaskDto ToDto(this Models.Entities.Task entity)
+        {
+            var dto = new TaskDto()
+            {
+                Id = entity.Id,
+                LessonId = entity.LessonId,
+                Score = entity.Score,
+                Question = entity.Question,
+                TaskTypeId = entity.TaskTypeId,
+                Order = entity.Order
+            };
+            return dto;
+        }
+        public static Module ToEntity(this ModuleDto dto)
+        {
+            var entity = new Module()
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                CourseId = dto.CourseId,
+                Description = dto.Description,
+                Order = dto.Order,
+                LessonsHaveOrder = dto.LessonsHaveOrder
+            };
+            return entity;
+        }
+        public static TaskAnswer ToEntity(this TaskAnswerDto dto)
+        {
+            var entity = new TaskAnswer()
+            {
+                Id = dto.Id,
+                TextValue = dto.TextValue,
+                TaskId = dto.TaskId,
+                IsRight = dto.IsRight,
+                UserId = dto.UserId
+            };
+            return entity;
+        }
+        public static ModuleDto ToDto(this Module entity)
+        {
+            var dto = new ModuleDto()
+            {
+                Id = entity.Id,
+                Name = entity.Name,
+                CourseId = entity.CourseId,
+                Description = entity.Description,
+                Order = entity.Order,
+                LessonsCount = entity.Lessons?.Count,
+                LessonsHaveOrder = entity.LessonsHaveOrder
+            };
+            return dto;
+        }
+        public static CourseDto ToDto(this Course entity)
+        {
+            var dto = new CourseDto()
+            {
+                Id = entity.Id,
+                Description = entity.Description,
+                Name = entity.Name,
+                Price = entity.Price,
+                IsPublic = entity.IsPublic,
+                AuthorId = entity.AuthorId,
+                LinkedGroupId = entity.LinkedGroupId,
+                ModulesHaveOrder = entity.ModulesHaveOrder,
+                ModulesCount = entity.Modules?.Count,
+                LessonsCount = entity.Modules?.Sum(x => x.Lessons?.Count),
+                Themes = entity.Themes?.ToList().ConvertAll(x => x.ToDto())
+            };
+            return dto;
+        }
+        public static ThemeDto ToDto(this Theme entity)
+        {
+            var dto = new ThemeDto()
+            {
+                Id = entity.Id,
+                Name = entity.Name
+            };
+            return dto;
+        }
+        public static Theme ToEntity(this ThemeDto dto)
+        {
+            var entity = new Theme()
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+            };
+            return entity;
+        }
+
+        public static Lesson ToEntity(this LessonDto dto)
+        {
+            var entity = new Lesson()
+            {
+                Id = dto.Id,
+                Name = dto.Name,
+                Description = dto.Description,
+                IsRequired = dto.IsRequired,
+                ClosedUntil = dto.ClosedUntil,
+                MaxTriesCount =  dto.MaxTriesCount,
+                ModuleId = dto.ModuleId,
+                LessonTypeId = dto.LessonTypeId,
+                Order = dto.Order
+            };
+            return entity;
+        }
+    }
+}
