@@ -10,11 +10,11 @@
 Дизайн сделан с использованием Bootstrap 5 + BootstrapVueNext
 
 Части системы:
-- База данных PostgreSQL ([Entites и DTO](https://github.com/Afya2208/CourseBuilder/tree/master/Models))
-- [Web-API ASP.NET Core](https://github.com/Afya2208/CourseBuilder/tree/master/API)
-- [Веб-сайт на Vue.js + TypeScript](https://github.com/Afya2208/CourseBuilder/tree/master/Website)
+- База данных PostgreSQL ([Entites и DTO](https://github.com/Afya2208/CourseBuilder/tree/main/Models))
+- [Web-API ASP.NET Core](https://github.com/Afya2208/CourseBuilder/tree/main/API)
+- [Веб-сайт на Vue.js + TypeScript](https://github.com/Afya2208/CourseBuilder/tree/main/Website)
 
-[Авто-тесты платформы](https://github.com/Afya2208/CourseBuilder/tree/master/Tests)
+[Авто-тесты платформы](https://github.com/Afya2208/CourseBuilder/tree/main/Tests)
 
 ## Tech Stack
 * PostgreSQL 18
@@ -23,7 +23,7 @@
 * ASP.NET Core 9
 * EntityFramework Core 9
 * XUnit
-* Selenuim C#
+* Selenium C#
 
 ## Скриншоты работы
 
