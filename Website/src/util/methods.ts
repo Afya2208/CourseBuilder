@@ -1,6 +1,3 @@
-import type { Correlation } from '@/models/main'
-import type { AxiosError } from 'axios'
-
 export function randomInt(minInclude: number, maxInclude: number): number {
 	return Math.floor(Math.random() * (maxInclude - minInclude) + minInclude)
 }
@@ -16,7 +13,7 @@ export function getColorForCard(index: number) : object {
     return cssStyles;
 }
 
-// forms: [ед.ч. (1), род.п. ед.ч. (2-4), род.п. мн.ч. (5-0)]
+
 export function pluralizeRu(count:number, forms:Array<string>) {
     const n = Math.abs(count) % 100;
     const n1 = n % 10;

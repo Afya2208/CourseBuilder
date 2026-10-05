@@ -40,3 +40,4 @@ appsettings.*.json
 .idea/
 .directory
 Migrations
+.junie

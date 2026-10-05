@@ -1,30 +1,26 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using API;
-using API.Repositories;
-using API.Service;
+using API.Util;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Models.Entities;
+using Domain.Entities;
 using Serilog;
 using Serilog.Exceptions;
 
 
-Log.Logger = new LoggerConfiguration()
-.WriteTo.Console().CreateBootstrapLogger();
+Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateBootstrapLogger();
 
 try
 {
     Log.Information("Запуск веб-приложения");
-
     var builder = WebApplication.CreateBuilder(args);
     var conf = builder.Configuration;
     builder.Host.UseSerilog((context, services, loggerConfiguration) =>
     {
-        loggerConfiguration
-            .ReadFrom.Configuration(context.Configuration)
+        loggerConfiguration.ReadFrom.Configuration(context.Configuration)
             .ReadFrom.Services(services)
             .Enrich.FromLogContext()
             .Enrich.WithExceptionDetails()
@@ -51,17 +47,35 @@ try
             ValidIssuer = conf["JWT:Issuer"]
         };
     });
-    builder.Services.AddScoped<AuthService>();
-    builder.Services.AddRepositories();
-    builder.Services.AddExceptionHandler<GeneralExceptionHandler>();
+    builder.Services.AddAuthorization(opt =>
+    {
+        opt.AddPolicy("OnlyDev", policy =>
+        {
+            policy.RequireRole("Разработчик");
+        });
+        opt.AddPolicy("OnlyAdmin", policy =>
+        {
+            policy.RequireRole("Администратор");
+        });
+        opt.AddPolicy("AdminOrDev", policy =>
+        {
+            policy.RequireRole("Администратор", "Разработчик");
+        });
+        opt.AddPolicy("AllUsers", policy =>
+        {
+            policy.RequireRole("Администратор", "Разработчик", "Студент");
+        });
+    });
+    builder.Services.AddRepositoriesAndServices();
     builder.Services.AddProblemDetails();
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.WebHost.ConfigureKestrel(options =>
     {
-        options.Limits.MaxRequestBodySize = null;
+        options.Limits.MaxRequestBodySize = long.Parse(conf["Limits:MaxRequestBodySize"]);
     });
     builder.Services.Configure<FormOptions>(options =>
     {
-        options.MultipartBodyLengthLimit = 16106127360L; 
+        options.MultipartBodyLengthLimit = long.Parse(conf["Limits:MultipartBodyLengthLimit"]); 
     });
     var app = builder.Build();
     if (app.Environment.IsDevelopment())
@@ -69,17 +83,12 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-    app.UseCors(policy => 
-        policy
-            .AllowAnyHeader()
-            .AllowAnyMethod()
-            .AllowCredentials()
+    app.UseCors(policy => policy.AllowAnyHeader().AllowAnyMethod().AllowCredentials()
             .WithExposedHeaders("Accept-Ranges", "Content-Range", "Content-Length", "Content-Type", "Content-Disposition")
             .WithOrigins(conf["WebsiteUrl"]));
         
     app.UseSerilogRequestLogging(); 
     app.UseExceptionHandler();
-    
     app.UseHttpsRedirection();
     app.UseAuthentication();
     app.UseAuthorization();

@@ -5,9 +5,9 @@ import axios, { AxiosError, type AxiosResponse } from 'axios'
 const api = axios.create({
 	baseURL: 'http://localhost:5555',
 })
-// что делать при каждом запросе ЗАРАНЕЕ ДО ЗАПРОСА
+
 api.interceptors.request.use(
-	// дополнительные настройки для запросов
+
 	(config) => {
 		const userStore = useUserStore()
 		if (userStore.token && userStore.user) {
@@ -17,19 +17,19 @@ api.interceptors.request.use(
 	},
     (error) => {
         if (error.code == "ERR_NETWORK") {
-            //alert("Ошибка: не получается подключиться к серверу")
+            
         }
 		return Promise.reject(error)
 	},
 )
-// что делать при ответе ЗАРАНЕЕ ДО ВЫДАЧИ ОТВЕТА
+
 api.interceptors.response.use(
 	(response: AxiosResponse) => {
-		return response // дальнейшая передача ответа до места запроса
+		return response 
 	},
     (error: AxiosError) => {
         if (error.code == "ERR_NETWORK") {
-            //alert("Ошибка: не получается подключиться к серверу")
+            
         }
 		if (error.status == 401) {
 			const userStore = useUserStore()
@@ -39,7 +39,7 @@ api.interceptors.response.use(
 				router.push('/auth')
 			}
 		}
-		return Promise.reject(error) // дальнейшая передача error до места запроса
+		return Promise.reject(error) 
 	},
 )
 

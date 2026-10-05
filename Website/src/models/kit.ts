@@ -5,7 +5,7 @@ export type Kit = {
     authorId?: number
     price: number,
     selectedCoursesId?: number[]
-    coursesInfo: {
+    courses: {
         id: number,
         name?: string
     }[]

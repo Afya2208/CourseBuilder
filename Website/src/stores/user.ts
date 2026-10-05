@@ -41,8 +41,7 @@ export const useUserStore = defineStore('user-info', {
 			if (!token || !id || Number.isNaN(Number.parseInt(id))) {
 				return
 			}
-			await api
-				.get<User>(`users/${id}`, {
+			await api.get<User>(`users/${id}`, {
 					headers: { Authorization: `Bearer ${token}` },
 				})
 				.then((res) => {
@@ -54,11 +53,11 @@ export const useUserStore = defineStore('user-info', {
 					this.logOut()
                 })
             
-            await api.get<number[]>(`courses/available-for/${this.user?.id}/ids`)
+            await api.get<number[]>(`learn/user/${this.user?.id}/courses-ids`)
             .then(res => {
                 this.availableCoursesIds = res.data    
             })
-            await api.get<number[]>(`kits/available-for/${this.user?.id}/ids`)
+            await api.get<number[]>(`learn/user/${this.user?.id}/kits-ids`)
             .then(res => {
                 this.availableKitsIds = res.data    
             })

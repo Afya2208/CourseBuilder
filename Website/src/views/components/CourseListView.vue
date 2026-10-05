@@ -1,290 +1,195 @@
 <script setup lang="ts">
-import type { Course, CourseEditable, Theme } from '@/models/main'
-import api from '@/services/api'
-import { useUserStore } from '@/stores/user'
-import {
-	BButton,
-	BModal,
-	useToggle,
-	BForm,
-	BFormFloatingLabel,
-	BFormInput,
-	BFormSelect,
-	BFormCheckbox,
-} from 'bootstrap-vue-next'
+import type { CoursesAndTotalCount } from '@/models/coursesAndTotalCount.ts'
+import type { Course, Theme } from '@/models/main.ts'
+import api from '@/services/api.ts'
+import { useUserStore } from '@/stores/user.ts'
+import { BButton, BFormSelect, BInputGroup, BInputGroupText } from 'bootstrap-vue-next'
 import { storeToRefs } from 'pinia'
-import { ref } from 'vue'
+import { onMounted, ref, toRefs, watch } from 'vue'
 import { RouterLink } from 'vue-router'
+import PaginationView from './PaginationView.vue'
+import { pluralizeRu } from '@/util/methods.ts'
 
-const selectedThemeIdForSearch = ref<Number>()
-const searchText = ref('')
 const { user } = storeToRefs(useUserStore())
 const props = defineProps<{
-	themes: Theme[]
-	courses: Course[]
+	themes?: Theme[]
+	selectedThemeCardId?: number
 }>()
-const themes = ref(props.themes ?? [])
-const courses = ref(props.courses ?? [])
 
-const deleteCourse = async (course: Course, index: number) => {
-	if (confirm(`Вы уверены, что хотите удалить курс ${course.name}?`)) {
-		await api.delete(`courses/${course.id}`).then((res) => {
-			courses.value.splice(index, 1)
-		})
-	}
-}
-const { hide: hideCourseModal, show: showCourseModal } = useToggle('add-course-modal')
+watch(
+	() => props.selectedThemeCardId,
+	async (newVal, oldVal) => {
+		if (newVal) {
+			searchOptions.value.themeId = newVal
+			searchChanged.value = true
+			await searchCourses()
+		}
+	},
+)
 
-const addCourse = () => showCourseModal()
-const getNullCourse = (): CourseEditable => {
-	return {
-		id: 0,
-		name: '',
-		description: '',
-		authorId: user.value?.id ?? 0,
-        themesIds: [],
-        price: 0,
-		minimalCompletionPercentage: 100,
-		modulesHaveOrder: true,
-	}
-}
-const close = () => {
-	if (editableCourse.value.id != 0) {
-		selectedCourseIndex.value = undefined
-		editableCourse.value = getNullCourse()
-    }
-    hideCourseModal()
-}
-
-const editableCourse = ref<CourseEditable>(getNullCourse())
-const selectedCourseIndex = ref<number>()
-const saveCourse = async () => {
-
-    if (!editableCourse.value.description) {
-        alert("Укажите описание")
-        return
-    }
-    if (Number.isNaN(Number.parseInt(editableCourse.value.price.toString()))) {
-        alert("Укажите стоимость")
-        return
-    } else if (editableCourse.value.price < 0) {
-        alert("Укажите стоимость >= 0")
-        return
-    }
-    if (!editableCourse.value.minimalCompletionPercentage || editableCourse.value.minimalCompletionPercentage < 1
-        || editableCourse.value.minimalCompletionPercentage > 100) {
-        alert("Укажите минимальный процент прохождения >= 1 и <= 100")
-        return
-    }
-    if (!editableCourse.value.name) {
-        alert("Укажите название")
-        return
-    }
-    editableCourse.value.minimalCompletionPercentage = Math.trunc(editableCourse.value.minimalCompletionPercentage);  
-    editableCourse.value.price = Math.trunc(editableCourse.value.price); 
-
-	if (editableCourse.value.id == 0) {
-		await api
-			.post<Course>('courses', editableCourse.value)
-			.then((res) => {
-				courses.value.push({ ...res.data, lessonsCount: 0, modulesCount: 0 })
-				editableCourse.value = getNullCourse()
-				hideCourseModal()
-				alert('Курс успешно создан')
-			})
-			.catch((err) => {
-				hideCourseModal()
-				alert('Ошибка, повторите позже')
-			})
-	} else {
-		await api
-			.put<Course>('courses', editableCourse.value)
-			.then((res) => {
-				let oldCourse = courses.value[selectedCourseIndex.value!!]
-				let newCourse = res.data
-				newCourse.modulesCount = oldCourse?.modulesCount
-				newCourse.lessonsCount = oldCourse?.lessonsCount
-				courses.value[selectedCourseIndex.value!!] = newCourse
-				hideCourseModal()
-				alert('Курс успешно изменен')
-			})
-			.catch((err) => {
-				hideCourseModal()
-				alert('Ошибка, повторите позже')
-			})
-		editableCourse.value = getNullCourse()
-		selectedCourseIndex.value = undefined
-	}
-}
-const startEditingCourse = async (course: Course, index: number) => {
-	selectedCourseIndex.value = index
-	editableCourse.value = {
-		id: course.id,
-		name: course.name,
-		price: course.price,
-		description: course.description,
-		authorId: course.authorId ?? user.value?.id ?? 0,
-		themesIds: [],
-		minimalCompletionPercentage: course.minimalCompletionPercentage ?? 100,
-		modulesHaveOrder: course.modulesHaveOrder ?? true,
-	}
-	course.themes?.forEach((x) => editableCourse.value.themesIds.push(x.id))
-	showCourseModal()
-}
+const { themes } = toRefs(props)
+const courses = ref<Course[]>()
+const loadError = ref(false)
 const clearSearch = () => {
-	selectedThemeIdForSearch.value = 0
-	searchText.value = ''
+	searchOptions.value = getDefaultSearchOptions()
 }
-const searchCourses = async () => {
-	let text = searchText.value.trim()
-	let id = selectedThemeIdForSearch.value ?? null
-	let requestPath = 'courses/search?text=' + text
-	if (id && id != 0) {
-		requestPath += '&themeId=' + id
+const getDefaultSearchOptions = () => {
+	return {
+		pageNumber: 1,
+		pageSize: 15,
+		text: '',
 	}
-	await api.get<Course[]>(requestPath).then((res) => {
-		courses.value = res.data
-	})
+}
+const searchOptions = ref<{
+	pageNumber: number
+	themeId?: number
+	pageSize: number
+	text?: string
+}>(getDefaultSearchOptions())
+
+watch(
+	() => searchOptions.value.themeId,
+	() => {
+		searchChanged.value = true
+	},
+)
+watch(
+	() => searchOptions.value.text,
+	() => {
+		searchChanged.value = true
+	},
+)
+
+const totalCount = ref<number>(0)
+const searchChanged = ref(false)
+
+const searchCourses = async () => {
+	loadError.value = false
+	let requestPath = 'courses/search?'
+	requestPath += `pageSize=${searchOptions.value.pageSize}`
+	if (searchOptions.value.text) {
+		requestPath += `&text=${encodeURIComponent(searchOptions.value.text)}`
+	}
+	if (searchOptions.value.themeId) {
+		requestPath += `&themeId=${searchOptions.value.themeId}`
+	}
+	if (searchChanged.value) {
+		requestPath += `&pageNumber=1`
+		searchOptions.value.pageNumber = 1
+		searchChanged.value = false
+	} else {
+		requestPath += `&pageNumber=${searchOptions.value.pageNumber}`
+	}
+	await api
+		.get<CoursesAndTotalCount>(requestPath)
+		.then((res) => {
+			courses.value = res.data.courses
+			totalCount.value = res.data.totalCount
+		})
+		.catch(() => (loadError.value = true))
+}
+
+onMounted(async () => {
+	await searchCourses()
+})
+
+const onSelectedPage = async () => {
+	await searchCourses()
+}
+const formsModules = ['модуль', 'модуля', 'модулей']
+const formsLessons = ['занятие', 'занятия', 'занятий']
+
+const counts = (c: Course): string => {
+	return `${c.modulesCount ?? 0} ${pluralizeRu(c.modulesCount ?? 0, formsModules)}, ${c.lessonsCount ?? 0} ${pluralizeRu(c.lessonsCount ?? 0, formsLessons)}`
 }
 </script>
 
 <template>
-	<div class="d-flex">
-		<input
-			type="search"
-			style="width: 350px"
-			class="form-control-sm me-2"
-			v-model="searchText"
-			placeholder="Программирование..."
-		/>
-		<BFormSelect
-			class="form-control-sm"
-			:options="themes"
-			value-field="id"
-			text-field="name"
-			v-model="selectedThemeIdForSearch"
-		/>
-		<button type="button" class="btn mx-2 btn-outline-primary" @click="searchCourses">
-			Поиск
-		</button>
-		<BButton variant="outline-secondary" @click="clearSearch">Очистить</BButton>
-	</div>
 	<div>
-		<BButton class="my-2" v-if="user?.role.id == 1" variant="primary" @click="addCourse"
-			>Добавить новый курс</BButton
-		>
-	</div>
+		<h3 class="mt-3" id="header">Образовательные курсы</h3>
+		<p class="text-secondary small">
+			Посмотреть наборы курсов можно
+			<RouterLink to="/kits">на странице наборов</RouterLink>
+		</p>
 
-	<BModal
-		id="add-course-modal"
-		centered
-		header-class="bg-dark text-white"
-		header-close-class="bg-white"
-		@close="close"
-		title="Новый курс"
-		no-close-on-backdrop
-	>
-		<BForm>
-			<BFormFloatingLabel class="my-2" label="Название" label-for="course-name">
-				<BFormInput
-					id="course-name"
-					v-model.trim="editableCourse.name"
-					type="text"
-					placeholder="Новый курс"
-				/>
-			</BFormFloatingLabel>
-
-			<BFormFloatingLabel class="my-2" label="Описание" label-for="course-desc">
-				<BFormInput
-					id="course-desc"
-					v-model.trim="editableCourse.description"
-					type="text"
-					placeholder="Описание..."
-				/>
-			</BFormFloatingLabel>
-
-			<BFormFloatingLabel
-				class="my-2"
-				label="Стоимость (если необходимо)"
-				label-for="course-price"
-			>
-				<BFormInput
-                    type="text"
-                    pattern="\d*"
-                 v-model.number="editableCourse.price" id="course-price"  />
-			</BFormFloatingLabel>
-
-			<BFormCheckbox id="course-modules-have-order" v-model="editableCourse.modulesHaveOrder">
-				У модулей есть порядок
-			</BFormCheckbox>
-
-			<BFormFloatingLabel
-				class="my-2"
-				label="Минимальный процент прохождения для сдачи"
-				label-for="course-min-percentage"
-			>
-				<BFormInput
-					id="course-min-percentage"
-                    min="1"
-                    type="text"
-                    pattern="\d*"
-					max="100"
-					v-model.number="editableCourse.minimalCompletionPercentage"
-				/>
-			</BFormFloatingLabel>
-
-			<div>
-				<p>Темы:</p>
+		<div class="d-flex flex-wrap">
+			<input
+				type="search"
+				style="width: 350px"
+				class="m-1 form-control"
+				v-model.trim="searchOptions.text"
+				placeholder="Поиск..."
+			/>
+			<BInputGroup class="m-1 w-50">
+				<BInputGroupText class="d-inline">Тема:</BInputGroupText>
 				<BFormSelect
+					class="d-inline w-25"
 					:options="themes"
-					select-size="7"
-					v-model="editableCourse.themesIds"
+					style="width: 250px"
 					value-field="id"
 					text-field="name"
-					multiple
-					id="course-themes"
+					v-model="searchOptions.themeId"
 				/>
-			</div>
-		</BForm>
-		<template #footer>
-			<BButton variant="primary" @click="saveCourse()">Сохранить</BButton>
-			<BButton variant="dark" @click="close">Отмена</BButton>
-		</template>
-	</BModal>
+			</BInputGroup>
 
-	<div class="d-flex">
-		<div v-for="(course, index) in courses" class="card m-2">
-			<div class="card-body" style="max-width: 18rem">
-				<h5 class="card-title">
-					{{ course.name }}
-				</h5>
-				<p class="card-text">{{ course.description }}</p>
-				<p class="card-text">
-					Количество модулей: {{ course.modulesCount }}
-					<br />
-					Количество занятий: {{ course.lessonsCount }}
-				</p>
-				<p class="card-text" v-if="course.price && course.price > 0">
-					Стоимость: {{ course.price }} руб.
-				</p>
-				<RouterLink class="btn btn-outline-primary" :to="`courses/${course.id}`"
-					>Перейти к курсу</RouterLink
-				>
-				<h6 class="card-subtitle my-2 text-muted">Темы курса:</h6>
-				<ul>
-					<li v-for="theme in course.themes">
-						<p>{{ themes.find((x) => x.id == theme.id)?.name }}</p>
-					</li>
-				</ul>
-			</div>
-			<div v-if="user?.role.id == 1" class="card-footer">
-				<BButton variant="outline-danger" class="me-2" @click="deleteCourse(course, index)"
-					>❌</BButton
-				>
-				<BButton variant="outline-warning" @click="startEditingCourse(course, index)"
-					>✏️</BButton
-				>
+			<button type="button" class="btn m-1 btn-outline-primary" @click="searchCourses">
+				Поиск
+			</button>
+			<BButton variant="outline-secondary" class="m-1" @click="clearSearch"
+				>Очистить поля</BButton
+			>
+		</div>
+
+		<div v-if="!courses && !loadError">
+			<p>Загрузка данных, подождите, пожалуйста</p>
+		</div>
+
+		<div v-else-if="!courses && loadError">
+			<p>Ошибка загрузки данных, попробуйте позже</p>
+		</div>
+
+		<div v-else-if="courses && courses.length > 0" class="row row-cols-1 row-cols-md-3 g-4 p-2">
+			<div class="col" v-for="(course, index) in courses" :key="course.id">
+				<div class="card h-100 card-clickable" style="min-height: 330px">
+					<div class="card-body d-flex flex-column">
+						<h5 class="card-title">{{ course.name }}</h5>
+						<p class="card-text my-1">
+							{{ course.description }}
+						</p>
+						<RouterLink class="stretched-link" :to="`courses/${course.id}`" />
+						<p class="card-text my-1 text-primary mt-auto">
+							<span v-if="course.price > 0">Стоимость: {{ course.price }} руб.</span>
+							<span v-else>Бесплатно</span>
+						</p>
+						<p class="card-subtitle small text-primary-emphasis">
+							{{ counts(course) }}
+							<br />
+							Темы курса:
+							{{
+								course.themes
+									?.map((x) => themes?.find((t) => x.id == t.id)?.name)
+									.join(', ')
+							}}
+						</p>
+					</div>
+				</div>
 			</div>
 		</div>
+
+		<div v-else>
+			<p class="text-center p-1">
+				К сожалению, пока нет курсов
+				<span v-if="searchOptions.themeId || searchOptions.text">по данному запросу</span>
+			</p>
+		</div>
+
+		<PaginationView
+			v-if="courses && courses.length > 0"
+			:search-options="searchOptions"
+			:total-count="totalCount"
+			@selected-page="onSelectedPage"
+		/>
 	</div>
 </template>
+
+<style scoped></style>

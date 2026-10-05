@@ -11,66 +11,61 @@ const routes = [
 	{
 		path: '/auth',
 		name: 'authorization',
-		component: () => import('../views/pages/auth/AuthorizationPage.vue'),
+		component: () => import('../views/AuthorizationPage.vue'),
 	},
 	{
 		path: '/reg',
 		name: 'registration',
-		component: () => import('../views/pages/auth/RegistrationPage.vue'),
-	},
-	{
-		path: '/test',
-		name: 'testing',
-		component: () => import('../views/pages/test/TestPage.vue'),
+		component: () => import('../views/RegistrationPage.vue'),
 	},
 	{
 		path: '/feedback',
 		name: 'feedback',
-		component: () => import('../views/pages/SendReportPage.vue'),
+		component: () => import('../views/SendReportPage.vue'),
 	},
 	{
 		path: '/student-progress',
 		name: 'student progress',
-		component: () => import('../views/pages/for students/StudentProgress.vue'),
+		component: () => import('../views/students/StudentProgress.vue'),
 	},
 	{
 		path: '/courses',
 		name: 'courses',
-		component: () => import('../views/pages/EducationalCoursesPage.vue'),
+		component: () => import('../views/EducationalCoursesPage.vue'),
 	},
 	{
 		path: '/profile',
 		name: 'profile',
-		component: () => import('../views/pages/ProfilePage.vue'),
+		component: () => import('../views/ProfilePage.vue'),
 		meta: { requireAuth: true },
 	},
 	{
 		path: '/kits',
 		name: 'kits',
-		component: () => import('../views/pages/KitsPage.vue'),
+		component: () => import('../views/KitsPage.vue'),
 	},
 	{
 		path: '/my-groups',
 		name: 'my-groups',
-		component: () => import('../views/pages/MyGroupsPage.vue'),
+		component: () => import('../views/MyGroupsPage.vue'),
 		meta: { requireAuth: true },
 	},
 	{
 		path: '/my-courses',
 		name: 'myCourses',
-		component: () => import('../views/pages/MyCoursesPage.vue'),
+		component: () => import('../views/MyCoursesPage.vue'),
 		meta: { requireAuth: true },
 	},
 	{
 		path: '/payment/:type/:dataId',
 		name: 'payment',
-		component: () => import('../views/pages/test/PaymentPage.vue'),
+		component: () => import('../views/test/PaymentPage.vue'),
 		meta: { requireAuth: true },
 	},
 	{
 		path: '/admin/users',
 		name: 'admin users',
-		component: () => import('../views/pages/for admins/UsersPage.vue'),
+		component: () => import('../views/admins/UsersPage.vue'),
 		meta: {
 			requireAuth: true,
 			requireRoleAdmin: true,
@@ -79,7 +74,7 @@ const routes = [
 	{
 		path: '/admin/feedback',
 		name: 'admin feedback',
-		component: () => import('../views/pages/for admins/FeedbackPage.vue'),
+		component: () => import('../views/admins/FeedbackPage.vue'),
 		meta: {
 			requireAuth: true,
 			requireRoleAdmin: true,
@@ -88,7 +83,7 @@ const routes = [
 	{
 		path: '/creator-analytics',
 		name: 'creator analytics',
-		component: () => import('../views/pages/for creators/CreatorAnalyticsPage.vue'),
+		component: () => import('../views/developers/CreatorAnalyticsPage.vue'),
 		meta: {
 			requireAuth: true,
 			requireRoleCreator: true,
@@ -97,12 +92,12 @@ const routes = [
 	{
 		path: '/courses/:courseId',
 		name: 'course-page',
-		component: () => import('../views/pages/courses-content/CoursePage.vue'),
+		component: () => import('../views/courses-content/CoursePage.vue'),
 	},
 	{
 		path: '/courses/:courseId/modules/:moduleId',
 		name: 'module-page',
-		component: () => import('../views/pages/courses-content/ModulePage.vue'),
+		component: () => import('../views/courses-content/ModulePage.vue'),
 		meta: {
 			requireAuth: true,
 			requireAccess: true,
@@ -111,7 +106,7 @@ const routes = [
 	{
 		path: '/courses/:courseId/modules/:moduleId/lessons/:lessonId',
 		name: 'lesson-page',
-		component: () => import('../views/pages/courses-content/LessonPage.vue'),
+		component: () => import('../views/courses-content/LessonPage.vue'),
 		meta: {
 			requireAuth: true,
 			requireAccess: true,
